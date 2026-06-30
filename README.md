@@ -63,7 +63,29 @@ Documentacion Swagger: http://localhost:8000/docs
 
 ### 4. Frontend
 
+**Desarrollo local:**
+
 Abrir `frontend/index.html` con Live Server (VS Code) o cualquier servidor estatico en el puerto 5500.
+
+**Produccion (GitHub Pages):**
+
+El frontend se despliega automaticamente a GitHub Pages via GitHub Actions al hacer push a `master`.
+El workflow esta en `.github/workflows/deploy.yml`.
+
+Para habilitarlo en tu repo:
+1. Ve a Settings > Pages
+2. En "Build and deployment", selecciona **Source: GitHub Actions**
+3. El deploy se ejecuta automaticamente en el proximo push
+
+Para cambiar la URL del backend en produccion, usa el parametro `?api=`:
+```
+https://<username>.github.io/<repo>/?api=https://mi-backend.com
+```
+
+Tambien podes configurarlo desde la consola del navegador:
+```js
+setApiUrl("https://mi-backend.com");
+```
 
 ## Credenciales de Prueba
 
