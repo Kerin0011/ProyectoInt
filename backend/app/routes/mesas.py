@@ -1,0 +1,78 @@
+import uuid
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from app.models.database import get_db
+from app.models.models import Mesa, Usuario
+from app.schemas.schemas import MesaCreate, MesaResponse, EstadoUpdate
+from app.services.auth import get_current_user, require_role
+
+router = APIRouter(prefix="/api/mesas", tags=["mesas"])
+
+
+@router.get("", response_model=list[MesaResponse])
+def listar_mesas(
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    mesas = db.query(Mesa).all()
+    return [
+        MesaResponse(
+            id=m.id,
+            numero=m.numero,
+            token_qr=m.token_qr,
+            estado=m.estado.value
+        )
+        for m in mesas
+    ]
+
+
+@router.post("", response_model=MesaResponse, status_code=status.HTTP_201_CREATED)
+def crear_mesa(
+    data: MesaCreate,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(require_role("admin"))
+):
+    existente = db.query(Mesa).filter(Mesa.numero == data.numero).first()
+    if existente:
+        raise HTTPException(status_code=400, detail="Numero de mesa ya existe")
+
+    mesa = Mesa(
+        numero=data.numero,
+        token_qr=str(uuid.uuid4())
+    )
+    db.add(mesa)
+    db.commit()
+    db.refresh(mesa)
+
+    return MesaResponse(
+        id=mesa.id,
+        numero=mesa.numero,
+        token_qr=mesa.token_qr,
+        estado=mesa.estado.value
+    )
+
+
+@router.patch("/{mesa_id}/estado", response_model=MesaResponse)
+def cambiar_estado_mesa(
+    mesa_id: int,
+    data: EstadoUpdate,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    mesa = db.query(Mesa).filter(Mesa.id == mesa_id).first()
+    if not mesa:
+        raise HTTPException(status_code=404, detail="Mesa no encontrada")
+
+    if data.estado not in ["libre", "ocupada"]:
+        raise HTTPException(status_code=400, detail="Estado invalido")
+
+    mesa.estado = data.estado
+    db.commit()
+    db.refresh(mesa)
+
+    return MesaResponse(
+        id=mesa.id,
+        numero=mesa.numero,
+        token_qr=mesa.token_qr,
+        estado=mesa.estado.value
+    )
