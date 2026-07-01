@@ -30,13 +30,20 @@ def root():
 
 @app.get("/health")
 def health():
-    from app.config import DATABASE_URL
+    import os
     from app.models.models import Categoria
     from app.models.database import SessionLocal
+    info = {
+        "db_url": os.getenv("DATABASE_URL", "not set")[:60],
+        "db_private": (os.getenv("DATABASE_PRIVATE_URL") or "not set")[:60],
+    }
     try:
         db = SessionLocal()
         count = db.query(Categoria).count()
         db.close()
-        return {"db": "ok", "categorias": count}
+        info["db"] = "ok"
+        info["categorias"] = count
     except Exception as e:
-        return {"db": "error", "detail": str(e)}
+        info["db"] = "error"
+        info["detail"] = str(e)[:200]
+    return info
