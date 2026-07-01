@@ -23,10 +23,12 @@ app.include_router(pedidos.router)
 app.include_router(menu_publico.router)
 app.include_router(dashboard.router)
 
-FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "frontend")
+FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend")
 FRONTEND_DIR = os.path.realpath(FRONTEND_DIR)
 if not os.path.exists(FRONTEND_DIR):
-    FRONTEND_DIR = "/app/frontend"
+    FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "frontend")
+if not os.path.exists(FRONTEND_DIR):
+    FRONTEND_DIR = "/app/backend/frontend"
 if os.path.exists(FRONTEND_DIR):
     app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
 else:
