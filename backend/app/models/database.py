@@ -1,11 +1,16 @@
+import ssl
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app.config import DATABASE_URL
 
+ssl_context = ssl.create_default_context()
+ssl_context.check_hostname = False
+ssl_context.verify_mode = ssl.CERT_NONE
+
 engine = create_engine(
     DATABASE_URL,
     echo=False,
-    connect_args={"ssl": {}},
+    connect_args={"ssl": ssl_context},
     pool_pre_ping=True,
     pool_recycle=3600,
 )
