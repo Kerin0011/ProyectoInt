@@ -12,7 +12,7 @@ async function renderLoginPage(container) {
                     <div class="mb-3">
                         <label for="login-email" class="form-label">Email</label>
                         <input type="email" class="form-control" id="login-email" required
-                            placeholder="mozo@restaurante.com">
+                            placeholder="mozo@restaurante.com" value="admin@restaurante.com">
                     </div>
                     <div class="mb-3">
                         <label for="login-password" class="form-label">Contrasena</label>
@@ -34,7 +34,19 @@ async function renderLoginPage(container) {
         const errorDiv = document.getElementById("login-error");
 
         try {
-            const data = await api.post("/api/auth/login", { email, password });
+            const res = await fetch(API_BASE + "/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            });
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.detail || "Error " + res.status);
+            }
+            const data = await res.json();
+            if (!data || !data.access_token) {
+                throw new Error("Respuesta inválida del servidor");
+            }
             localStorage.setItem("token", data.access_token);
             localStorage.setItem("nombre", data.nombre);
             localStorage.setItem("rol", data.rol);

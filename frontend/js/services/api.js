@@ -1,5 +1,3 @@
-const API_BASE = "http://localhost:8000";
-
 const api = {
     headers() {
         const token = localStorage.getItem("token");

@@ -97,7 +97,7 @@ async function renderDashboardPage(container) {
         });
     });
 
-    setInterval(() => renderDashboardPage(container), 15000);
+    window._currentInterval = setInterval(() => renderDashboardPage(container), 15000);
 }
 
 router.register("/dashboard", renderDashboardPage);
