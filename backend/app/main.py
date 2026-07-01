@@ -27,3 +27,7 @@ FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "..", "f
 FRONTEND_DIR = os.path.abspath(FRONTEND_DIR)
 if os.path.exists(FRONTEND_DIR):
     app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
+else:
+    @app.get("/")
+    def root():
+        return {"message": "API running", "frontend_dir": FRONTEND_DIR}
