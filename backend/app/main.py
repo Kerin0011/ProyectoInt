@@ -26,3 +26,9 @@ app.include_router(dashboard.router)
 @app.get("/")
 def root():
     return {"message": "Restaurant Order API v1.0.0"}
+
+
+@app.get("/health")
+def health():
+    from app.config import DATABASE_URL
+    return {"db_url": DATABASE_URL[:50] + "..."}
