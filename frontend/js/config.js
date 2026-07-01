@@ -5,7 +5,7 @@ const API_BASE = (function () {
     if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
         return "http://localhost:8000";
     }
-    return "";
+    return "https://proyectoint-production-cf9f.up.railway.app";
 })();
 
 function setApiUrl(url) {
