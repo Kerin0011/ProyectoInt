@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ["python312", "gcc"]
+
+[phases.build]
+cmds = [
+    "pip install -r requirements.txt",
+    "cp -r frontend backend/frontend"
+]
+
+[include]
+paths = ["backend", "frontend", "requirements.txt", "railway.json"]
