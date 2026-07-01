@@ -2,7 +2,10 @@ const API_BASE = (function () {
     const params = new URLSearchParams(window.location.search);
     if (params.get("api")) return params.get("api");
     if (localStorage.getItem("api_url")) return localStorage.getItem("api_url");
-    return "http://localhost:8000";
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+        return "http://localhost:8000";
+    }
+    return "";
 })();
 
 function setApiUrl(url) {
