@@ -1,4 +1,3 @@
-import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import CORS_ORIGINS
@@ -26,24 +25,3 @@ app.include_router(dashboard.router)
 @app.get("/")
 def root():
     return {"message": "Restaurant Order API v1.0.0"}
-
-
-@app.get("/health")
-def health():
-    import os
-    from app.models.models import Categoria
-    from app.models.database import SessionLocal
-    info = {
-        "db_url": os.getenv("DATABASE_URL", "not set")[:60],
-        "db_private": (os.getenv("DATABASE_PRIVATE_URL") or "not set")[:60],
-    }
-    try:
-        db = SessionLocal()
-        count = db.query(Categoria).count()
-        db.close()
-        info["db"] = "ok"
-        info["categorias"] = count
-    except Exception as e:
-        info["db"] = "error"
-        info["detail"] = str(e)[:200]
-    return info
