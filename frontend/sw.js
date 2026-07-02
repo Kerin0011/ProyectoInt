@@ -1,5 +1,6 @@
-const CACHE_NAME = "restaurant-app-v2";
-const STATIC_ASSETS = [
+const CACHE_NAME = "restaurant-app-v3";
+
+const LOCAL_ASSETS = [
   "./",
   "./index.html",
   "./css/styles.css",
@@ -7,6 +8,7 @@ const STATIC_ASSETS = [
   "./js/app.js",
   "./js/router.js",
   "./js/services/api.js",
+  "./js/services/icons.js",
   "./js/components/navbar.js",
   "./js/pages/login.js",
   "./js/pages/dashboard.js",
@@ -16,15 +18,18 @@ const STATIC_ASSETS = [
   "./js/pages/ingredientes.js",
   "./js/pages/menu-publico.js",
   "./js/pages/seguimiento.js",
-  "./manifest.json",
-  "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css",
-  "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css",
-  "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+  "./manifest.json"
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+    caches.open(CACHE_NAME).then((cache) => {
+      return Promise.allSettled(
+        LOCAL_ASSETS.map((url) =>
+          cache.add(url).catch(() => {})
+        )
+      );
+    })
   );
   self.skipWaiting();
 });
@@ -32,40 +37,39 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(
-        keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
-      )
+      Promise.all(keys.map((k) => caches.delete(k)))
     )
   );
   self.clients.claim();
 });
 
 self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET") return;
-
   const url = new URL(event.request.url);
+
+  if (event.request.method !== "GET") return;
 
   if (url.pathname.startsWith("/api/")) {
     event.respondWith(networkFirst(event.request));
     return;
   }
 
-  event.respondWith(cacheFirst(event.request));
+  event.respondWith(staleWhileRevalidate(event.request));
 });
 
-async function cacheFirst(request) {
-  const cached = await caches.match(request);
-  if (cached) return cached;
-  try {
-    const response = await fetch(request);
-    if (response.ok) {
-      const cache = await caches.open(CACHE_NAME);
-      cache.put(request, response.clone());
-    }
-    return response;
-  } catch {
-    return caches.match("./index.html");
-  }
+async function staleWhileRevalidate(request) {
+  const cache = await caches.open(CACHE_NAME);
+  const cached = await cache.match(request);
+
+  const fetchPromise = fetch(request)
+    .then((response) => {
+      if (response.ok) {
+        cache.put(request, response.clone());
+      }
+      return response;
+    })
+    .catch(() => cached);
+
+  return cached || fetchPromise;
 }
 
 async function networkFirst(request) {
