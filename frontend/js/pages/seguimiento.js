@@ -5,14 +5,14 @@ async function renderSeguimientoPage(container) {
     const mesaToken = parts[1] || "";
 
     if (!pedidoId) {
-        container.innerHTML = `<div class="alert alert-warning">Pedido no especificado</div>`;
+        container.innerHTML = `<div class="tracking-app"><div class="empty-state" style="padding-top:80px">Pedido no especificado</div></div>`;
         return;
     }
 
     const pasos = [
-        { key: "pendiente", label: "Pendiente" },
+        { key: "pendiente", label: "Recibido" },
         { key: "confirmado", label: "Confirmado" },
-        { key: "en_preparacion", label: "En Preparacion" },
+        { key: "en_preparacion", label: "Preparando" },
         { key: "listo", label: "Listo" },
         { key: "entregado", label: "Entregado" }
     ];
@@ -20,81 +20,73 @@ async function renderSeguimientoPage(container) {
     async function load() {
         try {
             const pedido = await fetch(`${API_BASE}/api/public/pedidos/${pedidoId}`).then(r => r.json());
-
             const estadoIdx = pasos.findIndex(p => p.key === pedido.estado);
 
             container.innerHTML = `
-            <div class="container py-4" style="max-width:600px">
-                <div class="text-center mb-4">
-                    <span class="text-primary">${Icons.icon('clock', 56)}</span>
-                    <h3>Pedido #${pedido.id}</h3>
-                    <p class="text-muted">Mesa ${pedido.mesa_numero}</p>
+            <div class="tracking-app">
+                <div class="tracking-header">
+                    <div class="table-number">Mesa ${pedido.mesa_numero}</div>
+                    <h2>Pedido #${pedido.id}</h2>
                 </div>
 
                 ${pedido.estado === 'cancelado' ? `
-                    <div class="alert alert-danger text-center">
-                        <span class="text-danger">${Icons.icon('xCircle', 56)}</span>
-                        <h4>Pedido Cancelado</h4>
+                    <div style="text-align:center;padding:20px 0">
+                        <span style="display:inline-block;color:#c62828">${Icons.icon('xCircle', 56)}</span>
+                        <h4 style="margin-top:12px;color:#c62828">Pedido Cancelado</h4>
                         ${mesaToken ? `
-                        <button class="btn btn-primary mt-3" onclick="window.location.hash='#/menu/${mesaToken}'">
+                        <button class="tracking-action-btn" onclick="window.location.hash='#/menu/${mesaToken}'">
                             ${Icons.icon('plus', 18)} Volver al menu
                         </button>` : ''}
                     </div>` : `
-                <div class="timeline mb-4">
-                    ${pasos.map((paso, i) => `
-                        <div class="timeline-step ${i < estadoIdx ? 'done' : ''} ${i === estadoIdx ? 'active' : ''}">
-                            <div class="circle">${i < estadoIdx ? Icons.icon('check', 14) : (i + 1)}</div>
-                            <small>${paso.label}</small>
-                        </div>`).join("")}
-                </div>`}
+                    <div class="tracking-timeline">
+                        ${pasos.map((paso, i) => `
+                            <div class="tracking-step ${i < estadoIdx ? 'done' : ''} ${i === estadoIdx ? 'active' : ''}">
+                                <div class="step-dot">${i < estadoIdx ? Icons.icon('check', 14) : (i + 1)}</div>
+                                <div class="step-label">${paso.label}</div>
+                            </div>`).join("")}
+                    </div>`}
 
-                <div class="card">
-                    <div class="card-body">
-                        <h5>Detalle del pedido</h5>
-                        <table class="table table-sm">
-                            <thead><tr><th>Plato</th><th>Cant</th><th>Subtotal</th></tr></thead>
-                            <tbody>
-                                ${pedido.detalles.map(d => `
-                                    <tr>
-                                        <td>${d.plato_nombre}
-                                            ${d.personalizaciones.length > 0 ? `
-                                                <br><small class="text-muted">
-                                                    ${d.personalizaciones.map(p => p.accion + ": " + p.ingrediente_nombre).join(", ")}
-                                                </small>` : ""}
-                                        </td>
-                                        <td>${d.cantidad}</td>
-                                        <td>${formatPrice(d.subtotal)}</td>
-                                    </tr>`).join("")}
-                            </tbody>
-                            <tfoot>
-                                <tr class="fw-bold fs-5">
-                                    <td colspan="2" class="text-end">Total:</td>
-                                    <td>${formatPrice(pedido.total)}</td>
-                                </tr>
-                            </tfoot>
-                        </table>
+                ${pedido.estado !== 'cancelado' ? `
+                <div class="tracking-order-detail">
+                    <h5>Detalle del pedido</h5>
+                    ${pedido.detalles.map(d => `
+                        <div class="tracking-item-row">
+                            <div>
+                                <strong>${d.plato_nombre}</strong> x${d.cantidad}
+                                ${d.personalizaciones.length > 0 ? `
+                                <br><small style="color:#8c7569;font-size:12px">
+                                    ${d.personalizaciones.map(p => p.accion + ": " + p.ingrediente_nombre).join(", ")}
+                                </small>` : ""}
+                            </div>
+                            <strong>${formatPrice(d.subtotal)}</strong>
+                        </div>`).join("")}
+                    <div class="tracking-total">
+                        <span>Total</span>
+                        <span class="total-amount">${formatPrice(pedido.total)}</span>
                     </div>
-                </div>
+                </div>` : ""}
 
                 ${pedido.estado === 'entregado' ? `
-                    <div class="text-center mt-4">
-                        <span class="text-success">${Icons.icon('smile', 56)}</span>
-                        <h4>Disfruta tu comida!</h4>
+                    <div style="text-align:center;padding:20px 0">
+                        <span style="display:inline-block" class="tracking-status-badge delivered">
+                            ${Icons.icon('check', 18)} Pedido Entregado
+                        </span>
+                        <p style="color:#8c7569;margin-top:8px">Disfruta tu comida!</p>
                         ${mesaToken ? `
-                        <button class="btn btn-primary btn-lg mt-3" onclick="window.location.hash='#/menu/${mesaToken}'">
-                            ${Icons.icon('plus', 20)} Pedir algo mas
+                        <button class="tracking-action-btn" onclick="window.location.hash='#/menu/${mesaToken}'">
+                            ${Icons.icon('plus', 18)} Pedir algo mas
                         </button>` : ''}
                     </div>` : ''}
 
-                ${pedido.estado !== 'cancelado' && pedido.estado !== 'entregado' ? `
-                    <p class="text-center text-muted mt-3 small">Actualizando automaticamente...</p>` : ''}
+                ${pedido.estado === 'cancelado' ? '' : (pedido.estado !== 'entregado' ? `
+                    <p style="text-align:center;color:#8c7569;font-size:13px;margin-top:20px">Actualizando automaticamente...</p>` : '')}
             </div>`;
 
             if (pedido.estado !== "cancelado" && pedido.estado !== "entregado") {
                 setTimeout(() => renderSeguimientoPage(container), 5000);
             }
         } catch (err) {
-            container.innerHTML = `<div class="alert alert-danger m-4">${err.message}</div>`;
+            container.innerHTML = `<div class="tracking-app"><div class="empty-state" style="padding-top:80px">${err.message}</div></div>`;
         }
     }
 
