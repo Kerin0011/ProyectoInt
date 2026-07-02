@@ -143,7 +143,7 @@ class DetallePedido(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     pedido_id = Column(Integer, ForeignKey("pedidos.id", ondelete="CASCADE"), nullable=False)
-    plato_id = Column(Integer, ForeignKey("platos.id"), nullable=False)
+    plato_id = Column(Integer, ForeignKey("platos.id", ondelete="SET NULL"), nullable=True)
     cantidad = Column(Integer, default=1)
     precio_unitario = Column(DECIMAL(10, 2), nullable=False)
     subtotal = Column(DECIMAL(10, 2), nullable=False)

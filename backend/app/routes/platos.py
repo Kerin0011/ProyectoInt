@@ -129,6 +129,7 @@ def eliminar_plato(
     p = db.query(Plato).filter(Plato.id == plato_id).first()
     if not p:
         raise HTTPException(status_code=404, detail="Plato no encontrado")
+    db.query(PlatoIngrediente).filter(PlatoIngrediente.plato_id == plato_id).delete()
     db.delete(p)
     db.commit()
 

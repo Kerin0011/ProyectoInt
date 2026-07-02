@@ -91,12 +91,12 @@ CREATE TABLE pedidos (
 CREATE TABLE detalle_pedidos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     pedido_id INT NOT NULL,
-    plato_id INT NOT NULL,
+    plato_id INT DEFAULT NULL,
     cantidad INT DEFAULT 1,
     precio_unitario DECIMAL(10,2) NOT NULL,
     subtotal DECIMAL(10,2) NOT NULL,
     FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE CASCADE,
-    FOREIGN KEY (plato_id) REFERENCES platos(id)
+    FOREIGN KEY (plato_id) REFERENCES platos(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 10. PERSONALIZACIONES
