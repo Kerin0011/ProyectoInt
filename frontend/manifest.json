@@ -1,0 +1,18 @@
+{
+  "name": "Restaurant Order App",
+  "short_name": "Restaurant",
+  "description": "Sistema de pedidos para restaurante",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#212529",
+  "theme_color": "#0d6efd",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230d6efd' width='100' height='100' rx='20'/><text x='50' y='68' font-size='55' text-anchor='middle' fill='white'>🍽</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -2,7 +2,7 @@ async function renderDashboardPage(container) {
     const data = await api.get("/api/dashboard");
 
     container.innerHTML = `
-    <h3 class="mb-4"><i class="bi bi-speedometer2"></i> Dashboard</h3>
+    <h3 class="mb-4">${Icons.iconSpan('dashboard', 'me-2')}Dashboard</h3>
 
     <div class="row mb-4">
         <div class="col">
@@ -55,7 +55,7 @@ async function renderDashboardPage(container) {
                                 </div>
                                 <button class="btn btn-sm btn-outline-primary cambiar-estado-btn"
                                     data-id="${p.id}" data-estado="${p.estado}">
-                                    Avanzar <i class="bi bi-arrow-right"></i>
+                                    Avanzar ${Icons.icon('arrowRight', 14)}
                                 </button>
                             </div>
                         </div>`).join("")
@@ -97,6 +97,10 @@ async function renderDashboardPage(container) {
         });
     });
 
+    if (window._currentInterval) {
+        clearInterval(window._currentInterval);
+        window._currentInterval = null;
+    }
     window._currentInterval = setInterval(() => renderDashboardPage(container), 15000);
 }
 

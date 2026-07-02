@@ -17,9 +17,9 @@ async function renderPlatosPage(container) {
 
     function render() {
         container.innerHTML = `
-        <h3 class="mb-4"><i class="bi bi-egg-fried"></i> Gestion de Platos</h3>
+        <h3 class="mb-4">${Icons.iconSpan('platos', 'me-2')}Gestion de Platos</h3>
         <button class="btn btn-primary mb-3" id="btn-agregar-plato">
-            <i class="bi bi-plus-circle"></i> Agregar Plato
+            ${Icons.icon('plus', 18)} Agregar Plato
         </button>
         <div class="table-responsive">
             <table class="table table-hover">
@@ -40,10 +40,10 @@ async function renderPlatosPage(container) {
                             </td>
                             <td>
                                 <button class="btn btn-sm btn-outline-warning editar-btn me-1" data-id="${p.id}">
-                                    <i class="bi bi-pencil"></i>
+                                    ${Icons.icon('edit', 15)}
                                 </button>
                                 <button class="btn btn-sm btn-outline-danger eliminar-btn" data-id="${p.id}">
-                                    <i class="bi bi-trash"></i>
+                                    ${Icons.icon('trash', 15)}
                                 </button>
                             </td>
                         </tr>`).join("")}

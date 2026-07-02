@@ -1,6 +1,29 @@
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+svg {
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
 body {
     min-height: 100vh;
+    min-height: 100dvh;
     background-color: #f8f9fa;
+    touch-action: manipulation;
+}
+
+.offline-banner {
+    background: #dc3545;
+    color: #fff;
+    text-align: center;
+    padding: 6px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    position: sticky;
+    top: 0;
+    z-index: 1100;
 }
 
 .order-card {
@@ -23,11 +46,12 @@ body {
     cursor: pointer;
     transition: box-shadow 0.2s;
     height: 100%;
+    border-radius: 12px;
+    overflow: hidden;
 }
 
-.dish-card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
+.dish-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.dish-card:active { transform: scale(0.98); }
 
 .dish-card.unavailable {
     opacity: 0.6;
@@ -75,13 +99,12 @@ body {
     margin-bottom: 8px;
 }
 
-.timeline-step.active .circle {
-    background: #198754;
+.timeline-step .circle svg {
+    display: block;
 }
 
-.timeline-step.done .circle {
-    background: #6c757d;
-}
+.timeline-step.active .circle { background: #198754; }
+.timeline-step.done .circle { background: #6c757d; }
 
 .cart-fab {
     position: fixed;
@@ -141,4 +164,179 @@ body {
 
 .qr-display canvas {
     max-width: 200px;
+}
+
+/* =============================================
+   Tablet / Kiosko optimizations (<=1024px)
+   ============================================= */
+@media (max-width: 1024px) {
+    .navbar {
+        font-size: 15px;
+    }
+
+    .navbar-brand {
+        font-size: 16px;
+    }
+
+    .nav-link {
+        padding: 10px 14px;
+        font-size: 15px;
+    }
+
+    h3 { font-size: 1.3rem; }
+    h4 { font-size: 1.15rem; }
+    h5 { font-size: 1rem; }
+
+    .btn {
+        padding: 8px 16px;
+        font-size: 14px;
+        min-height: 40px;
+    }
+
+    .btn-sm {
+        padding: 5px 10px;
+        font-size: 13px;
+        min-height: 34px;
+    }
+
+    .form-control, .form-select {
+        font-size: 16px;
+        padding: 8px 12px;
+        min-height: 42px;
+    }
+
+    .table {
+        font-size: 14px;
+    }
+
+    .table th, .table td {
+        padding: 8px 6px;
+    }
+
+    .card-header {
+        padding: 10px 14px;
+    }
+
+    .card-body {
+        padding: 12px 14px;
+    }
+
+    .badge {
+        font-size: 12px;
+        padding: 5px 8px;
+    }
+
+    .order-card .card-body {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 8px;
+    }
+
+    .order-card .btn {
+        width: 100%;
+    }
+
+    #pedidos-lista .card-header {
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-start !important;
+    }
+
+    #pedidos-lista .card-header > div:last-child {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+    }
+
+    .modal-dialog {
+        margin: 10px auto;
+    }
+
+    .modal-lg {
+        max-width: 95vw;
+    }
+
+    .modal-body {
+        padding: 14px;
+    }
+
+    .dish-card .card-body {
+        padding: 12px;
+    }
+
+    .dish-card .card-title {
+        font-size: 15px;
+    }
+
+    .cart-fab {
+        width: 54px;
+        height: 54px;
+        font-size: 22px;
+        bottom: 16px;
+        right: 16px;
+    }
+
+    .timeline {
+        padding: 14px 0;
+    }
+
+    .timeline::before {
+        top: 28px;
+    }
+
+    .timeline-step .circle {
+        width: 26px;
+        height: 26px;
+        font-size: 12px;
+    }
+
+    .timeline-step small {
+        font-size: 11px;
+    }
+
+    #login-page {
+        margin: 40px auto;
+        padding: 0 12px;
+    }
+
+    .ingredient-option {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+
+    .ingredient-option .btn {
+        padding: 5px 10px;
+        font-size: 13px;
+        min-height: 32px;
+    }
+
+    .list-group-item {
+        padding: 10px 14px;
+        font-size: 14px;
+    }
+}
+
+/* Pantallas muy chicas (ej. teléfonos, tablets 7") */
+@media (max-width: 576px) {
+    h3 { font-size: 1.2rem; }
+    h4 { font-size: 1.05rem; }
+
+    .btn {
+        padding: 7px 12px;
+        font-size: 13px;
+        min-height: 38px;
+    }
+
+    .modal-dialog {
+        margin: 6px;
+    }
+
+    .table th, .table td {
+        padding: 6px 4px;
+        font-size: 13px;
+    }
+
+    .table-responsive {
+        margin: 0 -8px;
+    }
 }

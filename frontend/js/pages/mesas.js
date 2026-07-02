@@ -4,11 +4,11 @@ async function renderMesasPage(container) {
 
     function render() {
         container.innerHTML = `
-        <h3 class="mb-4"><i class="bi bi-grid-3x3-gap"></i> Gestion de Mesas</h3>
+        <h3 class="mb-4">${Icons.iconSpan('mesas', 'me-2')}Gestion de Mesas</h3>
 
         <div class="mb-3">
             <button class="btn btn-primary" id="btn-agregar-mesa">
-                <i class="bi bi-plus-circle"></i> Agregar Mesa
+                ${Icons.icon('plus', 18)} Agregar Mesa
             </button>
         </div>
 

@@ -6,9 +6,9 @@ const NavbarComponent = {
         let adminLinks = "";
         if (rol === "admin") {
             adminLinks = `
-                <li class="nav-item"><a class="nav-link" href="#/mesas">Mesas</a></li>
-                <li class="nav-item"><a class="nav-link" href="#/platos">Platos</a></li>
-                <li class="nav-item"><a class="nav-link" href="#/ingredientes">Ingredientes</a></li>
+                <li class="nav-item"><a class="nav-link" href="#/mesas">${Icons.iconSpan('mesas', 'me-1')}Mesas</a></li>
+                <li class="nav-item"><a class="nav-link" href="#/platos">${Icons.iconSpan('platos', 'me-1')}Platos</a></li>
+                <li class="nav-item"><a class="nav-link" href="#/ingredientes">${Icons.iconSpan('ingredientes', 'me-1')}Ingredientes</a></li>
             `;
         }
 
@@ -16,20 +16,20 @@ const NavbarComponent = {
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
             <div class="container-fluid">
                 <a class="navbar-brand" href="#/dashboard">
-                    <i class="bi bi-shop"></i> Restaurant Order
+                    ${Icons.iconSpan('shop', 'me-1')} Restaurant Order
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="mainNav">
                     <ul class="navbar-nav me-auto">
-                        <li class="nav-item"><a class="nav-link" href="#/dashboard">Dashboard</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#/pedidos">Pedidos</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#/dashboard">${Icons.iconSpan('dashboard', 'me-1')}Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#/pedidos">${Icons.iconSpan('pedidos', 'me-1')}Pedidos</a></li>
                         ${adminLinks}
                     </ul>
                     <span class="navbar-text me-3">${nombre} (${rol})</span>
                     <button class="btn btn-outline-light btn-sm" id="btn-logout">
-                        <i class="bi bi-box-arrow-right"></i> Salir
+                        ${Icons.icon('logout', 16)} Salir
                     </button>
                 </div>
             </div>

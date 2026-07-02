@@ -7,7 +7,7 @@ async function renderPedidosPage(container) {
 
     function render() {
         container.innerHTML = `
-        <h3 class="mb-4"><i class="bi bi-list-check"></i> Todos los Pedidos</h3>
+        <h3 class="mb-4">${Icons.iconSpan('pedidos', 'me-2')}Todos los Pedidos</h3>
 
         <div class="mb-3">
             <select class="form-select w-auto d-inline-block" id="filtro-estado">

@@ -7,9 +7,9 @@ async function renderIngredientesPage(container) {
 
     function render() {
         container.innerHTML = `
-        <h3 class="mb-4"><i class="bi bi-basket"></i> Gestion de Ingredientes</h3>
+        <h3 class="mb-4">${Icons.iconSpan('ingredientes', 'me-2')}Gestion de Ingredientes</h3>
         <button class="btn btn-primary mb-3" id="btn-agregar-ing">
-            <i class="bi bi-plus-circle"></i> Agregar Ingrediente
+            ${Icons.icon('plus', 18)} Agregar Ingrediente
         </button>
         <div class="table-responsive">
             <table class="table table-hover">
@@ -30,7 +30,7 @@ async function renderIngredientesPage(container) {
                             <td>${formatPrice(ing.precio_extra)}</td>
                             <td>
                                 <button class="btn btn-sm btn-outline-warning editar-ing-btn me-1" data-id="${ing.id}">
-                                    <i class="bi bi-pencil"></i>
+                                    ${Icons.icon('edit', 15)}
                                 </button>
                             </td>
                         </tr>`).join("")}

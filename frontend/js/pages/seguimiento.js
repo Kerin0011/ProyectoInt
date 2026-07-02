@@ -24,20 +24,20 @@ async function renderSeguimientoPage(container) {
             container.innerHTML = `
             <div class="container py-4" style="max-width:600px">
                 <div class="text-center mb-4">
-                    <i class="bi bi-clock-history display-1 text-primary"></i>
+                    <span class="text-primary">${Icons.icon('clock', 56)}</span>
                     <h3>Pedido #${pedido.id}</h3>
                     <p class="text-muted">Mesa ${pedido.mesa_numero}</p>
                 </div>
 
                 ${pedido.estado === 'cancelado' ? `
                     <div class="alert alert-danger text-center">
-                        <i class="bi bi-x-circle display-4"></i>
+                        <span class="text-danger">${Icons.icon('xCircle', 56)}</span>
                         <h4>Pedido Cancelado</h4>
                     </div>` : `
                 <div class="timeline mb-4">
                     ${pasos.map((paso, i) => `
                         <div class="timeline-step ${i < estadoIdx ? 'done' : ''} ${i === estadoIdx ? 'active' : ''}">
-                            <div class="circle">${i < estadoIdx ? '<i class="bi bi-check"></i>' : (i + 1)}</div>
+                            <div class="circle">${i < estadoIdx ? Icons.icon('check', 14) : (i + 1)}</div>
                             <small>${paso.label}</small>
                         </div>`).join("")}
                 </div>`}
@@ -72,7 +72,7 @@ async function renderSeguimientoPage(container) {
 
                 ${pedido.estado === 'entregado' ? `
                     <div class="text-center mt-4">
-                        <i class="bi bi-emoji-smile display-1 text-success"></i>
+                        <span class="text-success">${Icons.icon('smile', 56)}</span>
                         <h4>Disfruta tu comida!</h4>
                     </div>` : ''}
 

@@ -4,7 +4,7 @@ async function renderLoginPage(container) {
         <div class="card shadow">
             <div class="card-body p-4">
                 <div class="text-center mb-4">
-                    <i class="bi bi-shop display-3 text-primary"></i>
+                    <span class="text-primary" style="display:inline-flex">${Icons.icon('shop', 56)}</span>
                     <h3 class="mt-2">Restaurant Order</h3>
                     <p class="text-muted">Inicia sesion para continuar</p>
                 </div>
@@ -20,7 +20,7 @@ async function renderLoginPage(container) {
                     </div>
                     <div id="login-error" class="alert alert-danger d-none"></div>
                     <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-box-arrow-in-right"></i> Ingresar
+                        ${Icons.icon('login', 18)} Ingresar
                     </button>
                 </form>
             </div>

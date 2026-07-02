@@ -19,7 +19,7 @@ async function renderMenuPublicoPage(container) {
         container.innerHTML = `
         <nav class="navbar navbar-dark bg-dark mb-3 rounded">
             <div class="container-fluid">
-                <span class="navbar-brand"><i class="bi bi-shop"></i> Mesa ${menu.mesa}</span>
+                <span class="navbar-brand">${Icons.iconSpan('shop', 'me-1')}Mesa ${menu.mesa}</span>
                 <span class="text-light">Selecciona tus platos</span>
             </div>
         </nav>
@@ -43,7 +43,7 @@ async function renderMenuPublicoPage(container) {
 
         ${cartCount > 0 ? `
         <button class="btn btn-primary cart-fab" onclick="window.abrirCarrito()">
-            <i class="bi bi-cart3"></i>
+            ${Icons.icon('cart', 22)}
             <span class="badge bg-danger cart-badge">${cartCount}</span>
         </button>` : ""}
 
@@ -202,7 +202,7 @@ window.abrirCarrito = function() {
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-dark text-white">
-                    <h5 class="modal-title"><i class="bi bi-cart3"></i> Tu Pedido</h5>
+                    <h5 class="modal-title">${Icons.iconSpan('cart', 'me-2')}Tu Pedido</h5>
                     <button type="button" class="btn-close btn-close-white" onclick="document.getElementById('modal-container').innerHTML=''"></button>
                 </div>
                 <div class="modal-body">
@@ -219,7 +219,7 @@ window.abrirCarrito = function() {
                                 <div class="text-end">
                                     <span class="fw-bold">${formatPrice(item.precio_final * item.cantidad)}</span>
                                     <br><button class="btn btn-sm btn-outline-danger eliminar-item-btn" data-idx="${idx}">
-                                        <i class="bi bi-trash"></i>
+                                        ${Icons.icon('trash', 14)}
                                     </button>
                                 </div>
                             </div>`).join("")}
@@ -232,7 +232,7 @@ window.abrirCarrito = function() {
                 <div class="modal-footer">
                     <button class="btn btn-secondary" onclick="document.getElementById('modal-container').innerHTML=''">Seguir comprando</button>
                     <button class="btn btn-success" id="btn-confirmar-pedido" ${cart.length === 0 ? "disabled" : ""}>
-                        <i class="bi bi-check-circle"></i> Confirmar Pedido
+                        ${Icons.icon('check', 18)} Confirmar Pedido
                     </button>
                 </div>
             </div>
