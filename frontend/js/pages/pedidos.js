@@ -2,12 +2,21 @@ async function renderPedidosPage(container) {
     let pedidos = [];
 
     async function load() {
-        try { pedidos = await api.get("/api/pedidos"); } catch (e) { pedidos = []; }
+        try {
+            pedidos = await api.get("/api/pedidos");
+            try { localStorage.setItem("cached_pedidos", JSON.stringify({ data: pedidos, ts: Date.now() })); } catch {}
+        } catch (e) {
+            try {
+                const cached = localStorage.getItem("cached_pedidos");
+                if (cached) pedidos = JSON.parse(cached).data;
+            } catch {}
+        }
     }
 
     function render() {
+        const isOffline = !navigator.onLine;
         container.innerHTML = `
-        <h3 class="mb-4">${Icons.iconSpan('pedidos', 'me-2')}Todos los Pedidos</h3>
+        <h3 class="mb-4">${Icons.iconSpan('pedidos', 'me-2')}Todos los Pedidos ${isOffline ? '<span class="badge bg-warning text-dark ms-2" style="font-size:12px">Sin conexion</span>' : ''}</h3>
 
         <div class="mb-3">
             <select class="form-select w-auto d-inline-block" id="filtro-estado">

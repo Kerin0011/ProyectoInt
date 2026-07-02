@@ -1,8 +1,27 @@
 async function renderDashboardPage(container) {
-    const data = await api.get("/api/dashboard");
+    let data = null;
+
+    try {
+        data = await api.get("/api/dashboard");
+        if (data) {
+            try { localStorage.setItem("cached_dashboard", JSON.stringify({ data, ts: Date.now() })); } catch {}
+        }
+    } catch (e) {
+        try {
+            const cached = localStorage.getItem("cached_dashboard");
+            if (cached) data = JSON.parse(cached).data;
+        } catch {}
+    }
+
+    if (!data) {
+        container.innerHTML = `<div class="text-center py-5 text-muted"><h5>Sin conexion</h5><p>Conectate a internet para ver el dashboard.</p></div>`;
+        return;
+    }
+
+    const isOffline = !navigator.onLine;
 
     container.innerHTML = `
-    <h3 class="mb-4">${Icons.iconSpan('dashboard', 'me-2')}Dashboard</h3>
+    <h3 class="mb-4">${Icons.iconSpan('dashboard', 'me-2')}Dashboard ${isOffline ? '<span class="badge bg-warning text-dark ms-2" style="font-size:12px">Sin conexion</span>' : ''}</h3>
 
     <div class="row mb-4">
         <div class="col">
