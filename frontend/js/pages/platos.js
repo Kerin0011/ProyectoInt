@@ -140,7 +140,7 @@ async function renderPlatosPage(container) {
 
         document.getElementById("btn-guardar-plato").addEventListener("click", async () => {
             const nombre = document.getElementById("fp-nombre").value;
-            const descripcion = document.getElementById("fp-descripcion").value;
+            const descripcion = document.getElementById("fp-descripcion").value || null;
             const precio_base = parseFloat(document.getElementById("fp-precio").value);
             const categoria_id = parseInt(document.getElementById("fp-categoria").value);
 
@@ -154,7 +154,14 @@ async function renderPlatosPage(container) {
                 });
             });
 
-            const body = { nombre, descripcion, precio_base, categoria_id, ingredientes: selectedIngs };
+            const body = {
+                nombre,
+                descripcion,
+                precio_base,
+                categoria_id,
+                disponible: true,
+                ingredientes: selectedIngs
+            };
 
             try {
                 if (esEditar) {
@@ -165,7 +172,10 @@ async function renderPlatosPage(container) {
                 modalContainer.innerHTML = "";
                 showToast(esEditar ? "Plato actualizado" : "Plato creado", "success");
                 renderPlatosPage(container);
-            } catch (err) { showToast(err.message, "danger"); }
+            } catch (err) {
+                console.error("Guardar plato error:", err);
+                showToast(err.message, "danger");
+            }
         });
     }
 
