@@ -112,8 +112,12 @@ async function renderPlatosPage(container) {
                                     <option value="2" ${plato?.categoria_id === 2 ? "selected" : ""}>Platos Fuertes</option>
                                     <option value="3" ${plato?.categoria_id === 3 ? "selected" : ""}>Bebidas</option>
                                     <option value="4" ${plato?.categoria_id === 4 ? "selected" : ""}>Postres</option>
-                                </select>
-                            </div>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">URL de la Imagen</label>
+                            <input class="form-control" type="url" id="fp-imagen" value="${plato?.imagen_url || ""}" placeholder="https://ejemplo.com/foto.jpg">
+                        </div>
                             <div class="mb-3">
                                 <label class="form-label">Ingredientes</label>
                                 <div id="ingredientes-checkboxes">
@@ -143,6 +147,7 @@ async function renderPlatosPage(container) {
             const descripcion = document.getElementById("fp-descripcion").value || null;
             const precio_base = parseFloat(document.getElementById("fp-precio").value);
             const categoria_id = parseInt(document.getElementById("fp-categoria").value);
+            const imagen_url = document.getElementById("fp-imagen").value || null;
 
             const selectedIngs = [];
             document.querySelectorAll(".ing-check:checked").forEach(cb => {
@@ -159,6 +164,7 @@ async function renderPlatosPage(container) {
                 descripcion,
                 precio_base,
                 categoria_id,
+                imagen_url,
                 disponible: true,
                 ingredientes: selectedIngs
             };

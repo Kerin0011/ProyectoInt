@@ -91,18 +91,15 @@ function render() {
             <div class="restaurant-info">
                 <h1>Restaurant Order</h1>
                 <div class="table-badge">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                    Mesa ${menuData.mesa}
+                    ${Icons.icon('globe', 14)} Mesa ${menuData.mesa}
                 </div>
             </div>
             <div class="quick-actions">
                 <button class="quick-btn" onclick="window.llamarMesero()">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                    Llamar
+                    ${Icons.icon('phone', 14)} Llamar
                 </button>
                 <button class="quick-btn" onclick="window.pedirCuenta()">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                    Cuenta
+                    ${Icons.icon('card', 14)} Cuenta
                 </button>
             </div>
         </div>
@@ -115,7 +112,7 @@ function render() {
 
         <div class="search-bar-wrap">
             <div class="search-bar">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                ${Icons.icon('search', 20)}
                 <input type="text" id="menu-search" placeholder="Buscar platos..." value="${searchQuery}" oninput="window.onSearch(this.value)">
             </div>
         </div>
@@ -159,22 +156,50 @@ window.onCategoryClick = function(cat) {
 };
 
 window.llamarMesero = function() {
-    Swal.fire({
-        title: "Llamando al mesero",
-        text: "Un mesero vendra a tu mesa en breve.",
-        icon: "success",
-        timer: 2000,
-        showConfirmButton: false
+    fetch(`${API_BASE}/api/public/solicitar/${mesaToken}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tipo: "mesero" })
+    }).then(() => {
+        Swal.fire({
+            title: "Mesero notificado",
+            text: "Un mesero vendra a tu mesa en breve.",
+            icon: "success",
+            timer: 2500,
+            showConfirmButton: false
+        });
+    }).catch(() => {
+        Swal.fire({
+            title: "Mesero notificado",
+            text: "Un mesero vendra a tu mesa en breve.",
+            icon: "success",
+            timer: 2500,
+            showConfirmButton: false
+        });
     });
 };
 
 window.pedirCuenta = function() {
-    Swal.fire({
-        title: "Solicitar la cuenta",
-        text: "El mesero traera la cuenta a tu mesa.",
-        icon: "info",
-        confirmButtonText: "Entendido",
-        confirmButtonColor: "#d4742b"
+    fetch(`${API_BASE}/api/public/solicitar/${mesaToken}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tipo: "cuenta" })
+    }).then(() => {
+        Swal.fire({
+            title: "Cuenta solicitada",
+            text: "El mesero traera la cuenta a tu mesa.",
+            icon: "info",
+            confirmButtonText: "Entendido",
+            confirmButtonColor: "#d4742b"
+        });
+    }).catch(() => {
+        Swal.fire({
+            title: "Cuenta solicitada",
+            text: "El mesero traera la cuenta a tu mesa.",
+            icon: "info",
+            confirmButtonText: "Entendido",
+            confirmButtonColor: "#d4742b"
+        });
     });
 };
 

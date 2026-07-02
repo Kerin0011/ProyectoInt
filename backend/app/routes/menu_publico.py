@@ -3,7 +3,8 @@ from sqlalchemy.orm import Session
 from app.models.database import get_db
 from app.models.models import (
     Mesa, Plato, Categoria, PlatoIngrediente, Ingrediente,
-    Pedido, DetallePedido, Personalizacion, EstadoPedido, EstadoMesa
+    Pedido, DetallePedido, Personalizacion, EstadoPedido, EstadoMesa,
+    Solicitud
 )
 from app.schemas.schemas import (
     PedidoCreateRequest, PedidoResponse,
@@ -173,3 +174,24 @@ def seguimiento_pedido(pedido_id: int, db: Session = Depends(get_db)):
     if not pedido:
         raise HTTPException(status_code=404, detail="Pedido no encontrado")
     return _pedido_to_response(pedido)
+
+
+@router.post("/solicitar/{mesa_token}")
+def solicitar(
+    mesa_token: str,
+    data: dict,
+    db: Session = Depends(get_db)
+):
+    mesa = db.query(Mesa).filter(Mesa.token_qr == mesa_token).first()
+    if not mesa:
+        raise HTTPException(status_code=404, detail="Mesa no encontrada")
+
+    tipo = data.get("tipo", "")
+    if tipo not in ("mesero", "cuenta"):
+        raise HTTPException(status_code=400, detail="Tipo invalido")
+
+    solicitud = Solicitud(mesa_id=mesa.id, tipo=tipo)
+    db.add(solicitud)
+    db.commit()
+
+    return {"message": f"Solicitud de {tipo} registrada", "id": solicitud.id}

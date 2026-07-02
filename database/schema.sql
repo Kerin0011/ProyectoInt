@@ -111,6 +111,16 @@ CREATE TABLE personalizaciones (
     FOREIGN KEY (ingrediente_id) REFERENCES ingredientes(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 11. SOLICITUDES (llamar mesero, pedir cuenta)
+CREATE TABLE solicitudes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    mesa_id INT NOT NULL,
+    tipo VARCHAR(20) NOT NULL,
+    atendida TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (mesa_id) REFERENCES mesas(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- ============================================
 -- DATOS SEMILLA
 -- ============================================

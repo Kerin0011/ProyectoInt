@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import CORS_ORIGINS
-from app.routes import auth, mesas, platos, ingredientes, pedidos, menu_publico, dashboard
+from app.routes import auth, mesas, platos, ingredientes, pedidos, menu_publico, dashboard, solicitudes
 
 app = FastAPI(title="Restaurant Order API", version="1.0.0")
 
@@ -20,6 +20,7 @@ app.include_router(ingredientes.router)
 app.include_router(pedidos.router)
 app.include_router(menu_publico.router)
 app.include_router(dashboard.router)
+app.include_router(solicitudes.router)
 
 
 @app.get("/")

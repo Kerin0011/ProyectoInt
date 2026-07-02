@@ -160,3 +160,19 @@ class EstadoUpdate(BaseModel):
 
 class DisponibilidadUpdate(BaseModel):
     disponible: bool
+
+
+class SolicitudRequest(BaseModel):
+    tipo: str
+
+
+class SolicitudResponse(BaseModel):
+    id: int
+    mesa_id: int
+    mesa_numero: Optional[str] = None
+    tipo: str
+    atendida: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

@@ -165,3 +165,15 @@ class Personalizacion(Base):
 
     detalle_pedido = relationship("DetallePedido", back_populates="personalizaciones")
     ingrediente = relationship("Ingrediente")
+
+
+class Solicitud(Base):
+    __tablename__ = "solicitudes"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    mesa_id = Column(Integer, ForeignKey("mesas.id"), nullable=False)
+    tipo = Column(String(20), nullable=False)
+    atendida = Column(Boolean, default=False)
+    created_at = Column(TIMESTAMP, server_default=func.now())
+
+    mesa = relationship("Mesa")
