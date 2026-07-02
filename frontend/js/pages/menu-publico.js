@@ -26,12 +26,16 @@ async function renderMenuPublicoPage(container) {
 
 function render() {
     const container = document.getElementById("app-content");
+    if (!menuData || !menuData.categorias) {
+        container.innerHTML = `<div class="menu-app"><div class="empty-state" style="padding-top:80px"><p>Error al cargar el menu</p></div></div>`;
+        return;
+    }
     const allPlatos = [];
     const categorias = new Map();
 
-    menuData.categorias.forEach(cat => {
+    (menuData.categorias || []).forEach(cat => {
         categorias.set(cat.nombre, []);
-        cat.platos.forEach(p => {
+        (cat.platos || []).forEach(p => {
             allPlatos.push({ ...p, categoria_nombre: cat.nombre });
             categorias.get(cat.nombre).push({ ...p, categoria_nombre: cat.nombre });
         });
@@ -195,7 +199,7 @@ window.abrirPersonalizacion = function(platoId, nombre, precioBase) {
                 </div>
                 <div class="customization-body">
                     <div class="customization-price" id="precio-actual">${formatPrice(currentPrice)}</div>
-                    ${plato.ingredientes.map(ing => {
+                    ${(plato.ingredientes || []).map(ing => {
                         if (ing.es_default && !ing.es_removible) {
                             return `<div class="ingredient-row">
                                 <span class="ing-name">${ing.nombre}</span>
