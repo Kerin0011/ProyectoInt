@@ -116,7 +116,12 @@ def editar_plato(
         )
         db.add(pi)
 
-    db.commit()
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f"PUT /api/platos/{plato_id} COMMIT ERROR: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
     db.refresh(p)
     return _plato_to_response(p)
 
