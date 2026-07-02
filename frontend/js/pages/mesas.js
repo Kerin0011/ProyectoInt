@@ -35,7 +35,18 @@ async function renderMesasPage(container) {
         </div>`;
 
         document.getElementById("btn-agregar-mesa")?.addEventListener("click", async () => {
-            const numero = prompt("Numero de mesa (ej: M6):");
+            const { value: numero } = await Swal.fire({
+                title: "Agregar Mesa",
+                text: "Numero de mesa (ej: M6)",
+                input: "text",
+                inputPlaceholder: "M6",
+                showCancelButton: true,
+                confirmButtonText: "Agregar",
+                cancelButtonText: "Cancelar",
+                inputValidator: (value) => {
+                    if (!value) return "Ingresa un numero de mesa";
+                }
+            });
             if (!numero) return;
             try {
                 await api.post("/api/mesas", { numero });
