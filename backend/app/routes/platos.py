@@ -107,7 +107,7 @@ def editar_plato(
     db.query(PlatoIngrediente).filter(PlatoIngrediente.plato_id == plato_id).delete()
     for ing_data in data.ingredientes:
         pi = PlatoIngrediente(
-            plato_id=plato.id,
+            plato_id=p.id,
             ingrediente_id=ing_data.ingrediente_id,
             es_default=ing_data.es_default,
             es_extra=ing_data.es_extra,
