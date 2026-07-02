@@ -101,7 +101,10 @@ async function renderDashboardPage(container) {
         clearInterval(window._currentInterval);
         window._currentInterval = null;
     }
-    window._currentInterval = setInterval(() => renderDashboardPage(container), 15000);
+    window._currentInterval = setInterval(() => {
+        if (window.location.hash !== "#/dashboard") return;
+        renderDashboardPage(container);
+    }, 15000);
 }
 
 router.register("/dashboard", renderDashboardPage);
