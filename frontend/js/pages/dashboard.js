@@ -72,7 +72,27 @@ async function renderDashboardPage(container) {
                     </div>`).join("")}
             </div>
         </div>
-    </div>`;
+    </div>
+
+    ${data.solicitudes && data.solicitudes.length > 0 ? `
+    <div class="row mt-4">
+        <div class="col-12">
+            <h5><i class="text-warning">&#x1F514;</i> Solicitudes Pendientes</h5>
+            <div class="list-group">
+                ${data.solicitudes.map(s => `
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Mesa ${s.mesa}</strong>
+                            <span class="ms-2 badge ${s.tipo === 'mesero' ? 'bg-primary' : 'bg-info'}">${s.tipo === 'mesero' ? 'Llamar mesero' : 'Pedir cuenta'}</span>
+                        </div>
+                        <button class="btn btn-sm btn-outline-success atender-solicitud-btn" data-id="${s.id}">
+                            Atendido
+                        </button>
+                    </div>`).join("")}
+            </div>
+        </div>
+    </div>` : ""}
+    `;
 
     document.querySelectorAll(".cambiar-estado-btn").forEach(btn => {
         btn.addEventListener("click", async () => {
@@ -94,6 +114,16 @@ async function renderDashboardPage(container) {
             } catch (err) {
                 showToast(err.message, "danger");
             }
+        });
+    });
+
+    document.querySelectorAll(".atender-solicitud-btn").forEach(btn => {
+        btn.addEventListener("click", async () => {
+            try {
+                await api.patch(`/api/solicitudes/${btn.dataset.id}/atender`);
+                showToast("Solicitud atendida", "success");
+                renderDashboardPage(container);
+            } catch (err) { showToast(err.message, "danger"); }
         });
     });
 

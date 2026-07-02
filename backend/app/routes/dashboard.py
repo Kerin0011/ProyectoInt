@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.models.database import get_db
-from app.models.models import Pedido, Mesa, Usuario
+from app.models.models import Pedido, Mesa, Usuario, Solicitud
 from app.services.auth import get_current_user
 
 router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
@@ -44,8 +44,20 @@ def dashboard(
         for m in mesas
     ]
 
+    solicitudes = db.query(Solicitud).filter(Solicitud.atendida == False).order_by(Solicitud.created_at.desc()).all()
+    solicitudes_data = [
+        {
+            "id": s.id,
+            "mesa": s.mesa.numero if s.mesa else "N/A",
+            "tipo": s.tipo,
+            "created_at": s.created_at.isoformat()
+        }
+        for s in solicitudes
+    ]
+
     return {
         "resumen": resumen,
         "pedidos": pedidos_data,
-        "mesas": mesas_data
+        "mesas": mesas_data,
+        "solicitudes": solicitudes_data
     }
