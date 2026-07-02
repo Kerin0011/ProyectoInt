@@ -152,7 +152,7 @@ async function renderDashboardPage(container) {
     }
     window._currentInterval = setInterval(() => {
         if (window.location.hash !== "#/dashboard") return;
-        renderDashboardPage(container);
+        try { renderDashboardPage(container); } catch {}
     }, 15000);
 }
 

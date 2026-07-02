@@ -8,7 +8,7 @@ const api = {
 
     async get(path) {
         const res = await fetch(API_BASE + path, { headers: this.headers() });
-        if (res.status === 401) { localStorage.clear(); router.navigate("/login"); return null; }
+        if (res.status === 401) { handle401(); return null; }
         if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || "Error"); }
         if (res.status === 204) return null;
         return res.json();
@@ -18,7 +18,7 @@ const api = {
         const res = await fetch(API_BASE + path, {
             method: "POST", headers: this.headers(), body: JSON.stringify(body)
         });
-        if (res.status === 401) { localStorage.clear(); router.navigate("/login"); return null; }
+        if (res.status === 401) { handle401(); return null; }
         if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || "Error"); }
         return res.json();
     },
@@ -27,7 +27,7 @@ const api = {
         const res = await fetch(API_BASE + path, {
             method: "PUT", headers: this.headers(), body: JSON.stringify(body)
         });
-        if (res.status === 401) { localStorage.clear(); router.navigate("/login"); return null; }
+        if (res.status === 401) { handle401(); return null; }
         if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || "Error"); }
         return res.json();
     },
@@ -36,18 +36,24 @@ const api = {
         const res = await fetch(API_BASE + path, {
             method: "PATCH", headers: this.headers(), body: JSON.stringify(body)
         });
-        if (res.status === 401) { localStorage.clear(); router.navigate("/login"); return null; }
+        if (res.status === 401) { handle401(); return null; }
         if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || "Error"); }
         return res.json();
     },
 
     async del(path) {
         const res = await fetch(API_BASE + path, { method: "DELETE", headers: this.headers() });
-        if (res.status === 401) { localStorage.clear(); router.navigate("/login"); return null; }
+        if (res.status === 401) { handle401(); return null; }
         if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || "Error"); }
         return null;
     }
 };
+
+function handle401() {
+    if (window.location.hash === "#/login") return;
+    localStorage.clear();
+    router.navigate("/login");
+}
 
 function showToast(message, type = "dark") {
     const toastEl = document.getElementById("toast-notification");
