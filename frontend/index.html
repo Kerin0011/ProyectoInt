@@ -48,11 +48,9 @@
     <script>
     if ("serviceWorker" in navigator) {
         navigator.serviceWorker.getRegistrations().then(function(registrations) {
-            for (let registration of registrations) {
-                registration.unregister();
-            }
+            return Promise.all(registrations.map(function(r) { return r.unregister(); }));
         }).then(function() {
-            navigator.serviceWorker.register("sw.js?v=3");
+            navigator.serviceWorker.register("sw.js?v=4");
         });
     }
     function updateOnlineStatus() {
