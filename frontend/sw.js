@@ -46,6 +46,7 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 
+  if (!url.protocol.startsWith("http")) return;
   if (event.request.method !== "GET") return;
 
   if (url.pathname.startsWith("/api/")) {
@@ -63,7 +64,7 @@ async function staleWhileRevalidate(request) {
   const fetchPromise = fetch(request)
     .then((response) => {
       if (response.ok) {
-        cache.put(request, response.clone());
+        try { cache.put(request, response.clone()); } catch {}
       }
       return response;
     })
@@ -76,8 +77,10 @@ async function networkFirst(request) {
   try {
     const response = await fetch(request);
     if (response.ok) {
-      const cache = await caches.open(CACHE_NAME);
-      cache.put(request, response.clone());
+      try {
+        const cache = await caches.open(CACHE_NAME);
+        cache.put(request, response.clone());
+      } catch {}
     }
     return response;
   } catch {

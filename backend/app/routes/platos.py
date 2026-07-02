@@ -92,7 +92,7 @@ def editar_plato(
     db: Session = Depends(get_db),
     current_user: Usuario = Depends(require_role("admin"))
 ):
-    print(f"PUT /api/platos/{plato_id} — body: {data.model_dump()}")
+    print(f"PUT /api/platos/{plato_id} — nombre={data.nombre}, precio={data.precio_base}, cat={data.categoria_id}, ings={len(data.ingredientes)}")
     p = db.query(Plato).filter(Plato.id == plato_id).first()
     if not p:
         raise HTTPException(status_code=404, detail="Plato no encontrado")
