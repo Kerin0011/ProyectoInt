@@ -16,4 +16,16 @@ SECRET_KEY = os.getenv("SECRET_KEY", "cambiar-esta-clave-en-produccion")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 8
 
-CORS_ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGINS", "*").split(",") if o.strip()]
+_raw_cors = os.getenv("CORS_ORIGINS", "").strip()
+if _raw_cors:
+    CORS_ORIGINS = [o.strip() for o in _raw_cors.split(",") if o.strip()]
+else:
+    CORS_ORIGINS = [
+        "http://localhost:5500",
+        "http://127.0.0.1:5500",
+        "http://localhost:5501",
+        "http://127.0.0.1:5501",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        "https://kerin0011.github.io",
+    ]
