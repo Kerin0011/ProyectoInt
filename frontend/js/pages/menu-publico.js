@@ -16,9 +16,23 @@ async function renderMenuPublicoPage(container) {
 
     try {
         menuData = await fetch(`${API_BASE}/api/public/menu/${mesaToken}`).then(r => r.json());
+        try {
+            localStorage.setItem("cached_menu_" + mesaToken, JSON.stringify({ data: menuData, ts: Date.now() }));
+        } catch {}
     } catch (err) {
-        container.innerHTML = `<div class="menu-app"><div class="empty-state" style="padding-top:80px">${Icons.icon('xCircle', 48)}<p>Mesa no encontrada o QR invalido</p></div></div>`;
-        return;
+        try {
+            const cached = localStorage.getItem("cached_menu_" + mesaToken);
+            if (cached) {
+                menuData = JSON.parse(cached).data;
+                showToast("Mostrando menu sin conexion", "warning");
+            } else {
+                container.innerHTML = `<div class="menu-app"><div class="empty-state" style="padding-top:80px">${Icons.icon('xCircle', 48)}<p>Sin conexion. Conectate a internet para ver el menu.</p></div></div>`;
+                return;
+            }
+        } catch {
+            container.innerHTML = `<div class="menu-app"><div class="empty-state" style="padding-top:80px">${Icons.icon('xCircle', 48)}<p>Sin conexion. Conectate a internet para ver el menu.</p></div></div>`;
+            return;
+        }
     }
 
     render();
@@ -423,12 +437,13 @@ window._confirmarPedido = async function() {
 
     if (!result.isConfirmed) return;
 
+    const detalles = cart.map(item => ({
+        plato_id: item.plato_id,
+        cantidad: item.cantidad,
+        personalizaciones: item.personalizaciones
+    }));
+
     try {
-        const detalles = cart.map(item => ({
-            plato_id: item.plato_id,
-            cantidad: item.cantidad,
-            personalizaciones: item.personalizaciones
-        }));
         const data = await fetch(`${API_BASE}/api/public/pedidos`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -440,6 +455,39 @@ window._confirmarPedido = async function() {
         showToast("Pedido enviado con exito!", "success");
         router.navigate(`/seguimiento/${data.id}/${mesaToken}`);
     } catch (err) {
-        showToast(err.message, "danger");
+        if (!navigator.onLine) {
+            queueOrder({ mesa_token: mesaToken, detalles: detalles });
+            cart = [];
+            document.getElementById("menu-modal-container").innerHTML = "";
+            showToast("Sin conexion. Tu pedido se enviara cuando vuelva internet.", "warning");
+            render();
+        } else {
+            showToast(err.message, "danger");
+        }
     }
 };
+
+function queueOrder(order) {
+    try {
+        const queue = JSON.parse(localStorage.getItem("order_queue") || "[]");
+        queue.push(order);
+        localStorage.setItem("order_queue", JSON.stringify(queue));
+    } catch {}
+}
+
+function syncQueuedOrders() {
+    try {
+        const queue = JSON.parse(localStorage.getItem("order_queue") || "[]");
+        if (queue.length === 0) return;
+        queue.forEach(order => {
+            fetch(`${API_BASE}/api/public/pedidos`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(order)
+            }).catch(() => {});
+        });
+        localStorage.removeItem("order_queue");
+    } catch {}
+}
+
+window.addEventListener("online", syncQueuedOrders);
