@@ -101,7 +101,8 @@ async function renderPedidosPage(container) {
         document.querySelectorAll(".cancelar-btn").forEach(btn => {
             btn.addEventListener("click", async () => {
                 const id = btn.dataset.id;
-                if (!confirm("Cancelar este pedido?")) return;
+                const ok = await showConfirm("Cancelar Pedido", "Seguro que queres cancelar este pedido?", "Cancelar", "danger");
+                if (!ok) return;
                 try {
                     await api.put(`/api/pedidos/${id}/cancelar`);
                     showToast(`Pedido #${id} cancelado`, "warning");

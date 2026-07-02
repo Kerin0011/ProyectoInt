@@ -61,7 +61,8 @@ async function renderPlatosPage(container) {
         });
         document.querySelectorAll(".eliminar-btn").forEach(btn => {
             btn.addEventListener("click", async () => {
-                if (!confirm("Eliminar este plato?")) return;
+                const ok = await showConfirm("Eliminar Plato", "Seguro que queres eliminar este plato? Esta accion no se puede deshacer.", "Eliminar", "danger");
+                if (!ok) return;
                 try {
                     await api.del(`/api/platos/${btn.dataset.id}`);
                     showToast("Plato eliminado", "success");
