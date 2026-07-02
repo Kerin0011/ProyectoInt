@@ -86,38 +86,15 @@ function estadoBadge(estado) {
 }
 
 function showConfirm(title, message, confirmText, confirmClass) {
-    return new Promise((resolve) => {
-        const existing = document.getElementById("confirm-modal");
-        if (existing) existing.remove();
-
-        const modal = document.createElement("div");
-        modal.id = "confirm-modal";
-        modal.className = "modal fade show d-block";
-        modal.setAttribute("tabindex", "-1");
-        modal.style.background = "rgba(0,0,0,0.5)";
-        modal.innerHTML = `
-            <div class="modal-dialog modal-dialog-centered modal-sm">
-                <div class="modal-content">
-                    <div class="modal-header border-0 pb-0">
-                        <h6 class="modal-title">${title}</h6>
-                        <button type="button" class="btn-close" id="confirm-cancel"></button>
-                    </div>
-                    <div class="modal-body py-3">
-                        <p class="mb-0">${message}</p>
-                    </div>
-                    <div class="modal-footer border-0 pt-0">
-                        <button class="btn btn-secondary btn-sm" id="confirm-no">Cancelar</button>
-                        <button class="btn btn-${confirmClass || 'danger'} btn-sm" id="confirm-yes">${confirmText || 'Confirmar'}</button>
-                    </div>
-                </div>
-            </div>`;
-
-        document.body.appendChild(modal);
-
-        const cleanup = () => { modal.remove(); };
-        modal.querySelector("#confirm-cancel").addEventListener("click", () => { cleanup(); resolve(false); });
-        modal.querySelector("#confirm-no").addEventListener("click", () => { cleanup(); resolve(false); });
-        modal.querySelector("#confirm-yes").addEventListener("click", () => { cleanup(); resolve(true); });
-        modal.addEventListener("click", (e) => { if (e.target === modal) { cleanup(); resolve(false); } });
-    });
+    return Swal.fire({
+        title: title,
+        text: message,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: confirmText || "Confirmar",
+        cancelButtonText: "Cancelar",
+        confirmButtonColor: confirmClass === "danger" ? "#dc3545" : "#0d6efd",
+        reverseButtons: true,
+        allowOutsideClick: false
+    }).then((result) => result.isConfirmed);
 }
