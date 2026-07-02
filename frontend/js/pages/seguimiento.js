@@ -1,6 +1,8 @@
 async function renderSeguimientoPage(container) {
     const hash = window.location.hash.slice(1);
-    const pedidoId = hash.replace("/seguimiento/", "");
+    const parts = hash.replace("/seguimiento/", "").split("/");
+    const pedidoId = parts[0];
+    const mesaToken = parts[1] || "";
 
     if (!pedidoId) {
         container.innerHTML = `<div class="alert alert-warning">Pedido no especificado</div>`;
@@ -33,6 +35,10 @@ async function renderSeguimientoPage(container) {
                     <div class="alert alert-danger text-center">
                         <span class="text-danger">${Icons.icon('xCircle', 56)}</span>
                         <h4>Pedido Cancelado</h4>
+                        ${mesaToken ? `
+                        <button class="btn btn-primary mt-3" onclick="window.location.hash='#/menu/${mesaToken}'">
+                            ${Icons.icon('plus', 18)} Volver al menu
+                        </button>` : ''}
                     </div>` : `
                 <div class="timeline mb-4">
                     ${pasos.map((paso, i) => `
@@ -74,6 +80,10 @@ async function renderSeguimientoPage(container) {
                     <div class="text-center mt-4">
                         <span class="text-success">${Icons.icon('smile', 56)}</span>
                         <h4>Disfruta tu comida!</h4>
+                        ${mesaToken ? `
+                        <button class="btn btn-primary btn-lg mt-3" onclick="window.location.hash='#/menu/${mesaToken}'">
+                            ${Icons.icon('plus', 20)} Pedir algo mas
+                        </button>` : ''}
                     </div>` : ''}
 
                 ${pedido.estado !== 'cancelado' && pedido.estado !== 'entregado' ? `

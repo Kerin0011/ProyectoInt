@@ -264,7 +264,7 @@ window.abrirCarrito = function() {
             cart = [];
             container.innerHTML = "";
             showToast("Pedido enviado con exito!", "success");
-            router.navigate(`/seguimiento/${data.id}`);
+            router.navigate(`/seguimiento/${data.id}/${mesaToken}`);
         } catch (err) {
             showToast(err.message, "danger");
         }
