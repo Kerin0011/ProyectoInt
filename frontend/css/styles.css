@@ -1098,19 +1098,10 @@ body {
 }
 
 /* =============================================
-   TABLET / ADMIN RESPONSIVE
+   RESPONSIVE — TABLETS & SMALL LAPTOPS (<=1024px)
    ============================================= */
 @media (max-width: 1024px) {
-    .navbar {
-        font-size: 15px;
-    }
-
-    .navbar-brand {
-        font-size: 16px;
-    }
-
-    .nav-link {
-        padding: 10px 14px;
+    body {
         font-size: 15px;
     }
 
@@ -1118,110 +1109,556 @@ body {
     h4 { font-size: 1.15rem; }
     h5 { font-size: 1rem; }
 
+    .container-fluid {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .navbar-brand { font-size: 16px; }
+    .nav-link { padding: 10px 14px; font-size: 15px; }
+
     .btn {
-        padding: 8px 16px;
-        font-size: 14px;
-        min-height: 40px;
+        padding: 10px 18px;
+        font-size: 15px;
+        min-height: 44px;
     }
 
     .btn-sm {
-        padding: 5px 10px;
+        padding: 7px 14px;
         font-size: 13px;
-        min-height: 34px;
+        min-height: 36px;
     }
 
     .form-control, .form-select {
         font-size: 16px;
-        padding: 8px 12px;
-        min-height: 42px;
+        padding: 10px 14px;
+        min-height: 44px;
     }
 
-    .table {
+    .table { font-size: 14px; }
+    .table th, .table td { padding: 10px 8px; }
+
+    .card-header { padding: 12px 16px; }
+    .card-body { padding: 14px 16px; }
+
+    .badge { font-size: 12px; padding: 5px 9px; }
+
+    /* -- Order cards -- */
+    .order-card .card-body {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 10px;
+    }
+
+    .order-card .btn { width: 100%; }
+
+    .pedido-card-left {
+        margin-bottom: 8px;
+    }
+
+    #pedidos-lista .card-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start !important;
+    }
+
+    #pedidos-lista .card-header .pedido-card-actions {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .pedido-card-left {
+        width: 100%;
+    }
+
+    /* -- Modals -- */
+    .modal-dialog {
+        margin: 10px auto;
+    }
+
+    .modal-lg { max-width: 95vw; }
+    .modal-body { padding: 16px; }
+
+    .modal-content {
+        border-radius: 16px;
+    }
+
+    /* -- Login -- */
+    #login-page {
+        margin: 40px auto;
+        padding: 0 16px;
+        max-width: 400px;
+    }
+
+    .list-group-item {
+        padding: 12px 16px;
+        font-size: 15px;
+    }
+
+    /* -- Filtro en pedidos -- */
+    #filtro-estado {
+        width: 100% !important;
+        margin-bottom: 8px;
+    }
+}
+
+/* =============================================
+   RESPONSIVE — PHONES (<=768px)
+   ============================================= */
+@media (max-width: 768px) {
+    body {
         font-size: 14px;
     }
 
-    .table th, .table td {
-        padding: 8px 6px;
+    h3 { font-size: 1.15rem; }
+    h4 { font-size: 1.05rem; }
+    h5 { font-size: 0.95rem; }
+
+    .container-fluid {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    /* -- Navbar -- */
+    .navbar {
+        padding: 8px 12px;
+    }
+
+    .navbar-brand {
+        font-size: 15px;
+    }
+
+    .navbar-toggler {
+        padding: 6px 10px;
+        font-size: 1.1rem;
+    }
+
+    .navbar-nav .nav-link {
+        padding: 12px 16px;
+        font-size: 15px;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .navbar-text {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+
+    .navbar .btn-outline-light {
+        margin: 4px 16px 10px;
+        width: calc(100% - 32px);
+    }
+
+    /* -- Buttons & forms -- */
+    .btn {
+        padding: 10px 16px;
+        font-size: 14px;
+        min-height: 44px;
+        border-radius: 10px;
+    }
+
+    .btn-sm {
+        padding: 7px 12px;
+        font-size: 13px;
+        min-height: 36px;
+        border-radius: 8px;
+    }
+
+    .form-control, .form-select {
+        font-size: 16px;
+        padding: 10px 12px;
+        min-height: 46px;
+        border-radius: 10px;
+    }
+
+    .form-check-input {
+        width: 20px;
+        height: 20px;
+        margin-top: 0;
+    }
+
+    .form-switch .form-check-input {
+        width: 40px;
+        height: 22px;
+    }
+
+    /* -- Tables -- */
+    .table { font-size: 13px; }
+    .table th, .table td { padding: 8px 6px; }
+
+    .table-responsive {
+        margin: 0 -10px;
+        width: calc(100% + 20px);
+    }
+
+    /* -- Cards -- */
+    .card {
+        border-radius: 12px;
     }
 
     .card-header {
-        padding: 10px 14px;
+        padding: 12px 14px;
     }
 
     .card-body {
         padding: 12px 14px;
     }
 
-    .badge {
-        font-size: 12px;
-        padding: 5px 8px;
+    /* -- Order cards -- */
+    .order-card .card-header {
+        padding: 12px 14px;
     }
 
-    .order-card .card-body {
-        flex-direction: column;
-        align-items: flex-start !important;
-        gap: 8px;
-    }
-
-    .order-card .btn {
+    .order-card .pedido-card-actions .btn {
         width: 100%;
+        margin-bottom: 4px;
     }
 
-    #pedidos-lista .card-header {
-        flex-direction: column;
-        gap: 8px;
-        align-items: flex-start !important;
+    /* -- Badges -- */
+    .badge {
+        font-size: 11px;
+        padding: 4px 8px;
     }
 
-    #pedidos-lista .card-header > div:last-child {
-        display: flex;
-        gap: 4px;
-        flex-wrap: wrap;
+    /* -- Dashboard stats -- */
+    #app-content > .row.mb-4 > .col {
+        padding: 4px;
     }
 
-    .modal-dialog {
-        margin: 10px auto;
+    #app-content > .row.mb-4 .card-body {
+        padding: 14px 8px;
     }
 
-    .modal-lg {
-        max-width: 95vw;
+    #app-content > .row.mb-4 .card-title {
+        font-size: 1.6rem;
     }
 
-    .modal-body {
+    #app-content > .row.mb-4 small {
+        font-size: 11px;
+    }
+
+    /* -- Mesas grid -- */
+    #mesas-grid .card-body {
         padding: 14px;
     }
 
+    #mesas-grid h5 {
+        font-size: 1rem;
+    }
+
+    .qr-display code {
+        font-size: 9px !important;
+        word-break: break-all;
+    }
+
+    /* -- Modals -- */
+    .modal-dialog {
+        margin: 8px;
+        max-width: calc(100vw - 16px);
+    }
+
+    .modal-content { border-radius: 14px; }
+    .modal-header { padding: 14px 16px; }
+    .modal-body { padding: 14px 16px; }
+    .modal-footer { padding: 12px 16px; }
+
+    .modal .form-check-inline {
+        display: block;
+        margin-right: 0;
+        margin-bottom: 6px;
+    }
+
+    /* -- Login -- */
     #login-page {
-        margin: 40px auto;
+        margin: 20px auto;
         padding: 0 12px;
     }
 
+    #login-page .card-body {
+        padding: 20px 16px;
+    }
+
+    /* -- List groups -- */
     .list-group-item {
-        padding: 10px 14px;
+        padding: 12px 14px;
         font-size: 14px;
+    }
+
+    /* -- Menu app additional -- */
+    .menu-app .header-bar {
+        padding: 10px 14px;
+    }
+
+    .menu-app .header-bar h1 {
+        font-size: 16px;
+    }
+
+    .menu-app .header-bar .quick-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    .menu-app .hero-banner {
+        padding: 28px 16px 40px;
+    }
+
+    .menu-app .hero-banner h2 {
+        font-size: 22px;
+    }
+
+    .menu-app .search-bar-wrap {
+        padding: 0 14px;
+    }
+
+    .menu-app .categories-scroll {
+        padding: 14px 14px 8px;
+    }
+
+    .menu-app .products-grid {
+        padding: 6px 14px;
+        gap: 12px;
+    }
+
+    .menu-app .cart-fab {
+        width: 56px;
+        height: 56px;
+        bottom: 20px;
+        right: 16px;
+    }
+
+    .tracking-app {
+        padding: 16px 14px 80px;
+    }
+
+    .tracking-timeline {
+        padding: 16px 4px;
+    }
+
+    .tracking-step .step-dot {
+        width: 24px;
+        height: 24px;
+        font-size: 11px;
+    }
+
+    .tracking-step .step-label {
+        font-size: 10px;
     }
 }
 
-@media (max-width: 576px) {
-    h3 { font-size: 1.2rem; }
-    h4 { font-size: 1.05rem; }
+/* =============================================
+   RESPONSIVE — SMALL PHONES (<=480px)
+   ============================================= */
+@media (max-width: 480px) {
+    body {
+        font-size: 13px;
+    }
+
+    h3 { font-size: 1.1rem; }
+
+    .container-fluid {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
 
     .btn {
-        padding: 7px 12px;
+        padding: 10px 14px;
         font-size: 13px;
-        min-height: 38px;
+        min-height: 42px;
     }
 
-    .modal-dialog {
-        margin: 6px;
+    .btn-sm {
+        padding: 6px 10px;
+        font-size: 12px;
+        min-height: 34px;
     }
 
-    .table th, .table td {
-        padding: 6px 4px;
+    .form-control, .form-select {
+        font-size: 16px;
+        padding: 9px 10px;
+        min-height: 44px;
+    }
+
+    .table { font-size: 12px; }
+    .table th, .table td { padding: 6px 4px; }
+
+    .card-header { padding: 10px 12px; }
+    .card-body { padding: 10px 12px; }
+
+    .badge { font-size: 10px; padding: 3px 7px; }
+
+    /* -- Dashboard stats: 2 per row -- */
+    #app-content > .row.mb-4 .card-body {
+        padding: 10px 6px;
+    }
+
+    #app-content > .row.mb-4 .card-title {
+        font-size: 1.3rem;
+    }
+
+    #app-content > .row.mb-4 small {
+        font-size: 10px;
+    }
+
+    /* -- QR code in mesas -- */
+    .qr-display code {
+        font-size: 8px !important;
+    }
+
+    /* -- Login -- */
+    #login-page {
+        margin: 10px auto;
+    }
+
+    #login-page .card-body {
+        padding: 16px 12px;
+    }
+
+    /* -- Menú público -- */
+    .menu-app .header-bar {
+        padding: 8px 10px;
+    }
+
+    .menu-app .header-bar h1 {
+        font-size: 14px;
+    }
+
+    .menu-app .header-bar .quick-btn {
+        padding: 5px 8px;
+        font-size: 11px;
+    }
+
+    .menu-app .hero-banner {
+        padding: 22px 12px 34px;
+    }
+
+    .menu-app .hero-banner .hero-icon {
+        font-size: 40px;
+    }
+
+    .menu-app .hero-banner h2 {
+        font-size: 20px;
+    }
+
+    .menu-app .hero-banner p {
         font-size: 13px;
     }
 
-    .table-responsive {
-        margin: 0 -8px;
+    .menu-app .search-bar {
+        padding: 10px 16px;
+        border-radius: 24px;
+    }
+
+    .menu-app .search-bar input {
+        font-size: 15px;
+    }
+
+    .menu-app .category-pill {
+        padding: 8px 14px;
+        font-size: 13px;
+    }
+
+    .menu-app .products-grid {
+        padding: 4px 8px;
+        gap: 10px;
+    }
+
+    .menu-app .product-card {
+        border-radius: 16px;
+    }
+
+    .menu-app .product-card .card-img {
+        font-size: 40px;
+    }
+
+    .menu-app .product-card .card-title {
+        font-size: 14px;
+    }
+
+    .menu-app .product-card .card-desc {
+        font-size: 12px;
+    }
+
+    .menu-app .product-card .card-price {
+        font-size: 17px;
+    }
+
+    .menu-app .product-card .btn-add {
+        width: 36px;
+        height: 36px;
+        font-size: 20px;
+    }
+
+    .menu-app .cart-fab {
+        width: 52px;
+        height: 52px;
+        bottom: 16px;
+        right: 12px;
+    }
+
+    .menu-app .cart-modal-sheet,
+    .menu-app .customization-sheet {
+        border-radius: 20px 20px 0 0;
+    }
+
+    .tracking-app {
+        padding: 12px 10px 70px;
+    }
+
+    .tracking-timeline::before {
+        left: 16px;
+        right: 16px;
+        top: 28px;
+    }
+
+    .tracking-step .step-dot {
+        width: 22px;
+        height: 22px;
+        font-size: 10px;
+    }
+
+    .tracking-step .step-label {
+        font-size: 9px;
+    }
+
+    .tracking-order-detail {
+        padding: 14px;
+    }
+}
+
+/* =============================================
+   RESPONSIVE — DESKTOP LARGE (>=1200px)
+   ============================================= */
+@media (min-width: 1200px) {
+    .container-fluid {
+        max-width: 1300px;
+        margin: 0 auto;
+    }
+
+    #app-content {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .menu-app .menu-content {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+}
+
+/* =============================================
+   TOUCH DEVICE ENHANCEMENTS
+   ============================================= */
+@media (hover: none) and (pointer: coarse) {
+    .btn, .btn-sm, .btn-add, .btn-ing, .btn-add-cart,
+    .btn-confirm-order, .tracking-action-btn, .cart-fab,
+    .category-pill, .product-card, .nav-link, .navbar-toggler {
+        cursor: default;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn:active, .btn-sm:active, .btn-add:active,
+    .btn-confirm-order:active, .tracking-action-btn:active {
+        transform: scale(0.96);
     }
 }
