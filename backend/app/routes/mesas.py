@@ -78,6 +78,20 @@ def cambiar_estado_mesa(
     )
 
 
+@router.delete("/{mesa_id}", status_code=status.HTTP_204_NO_CONTENT)
+def eliminar_mesa(
+    mesa_id: int,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(require_role("admin"))
+):
+    mesa = db.query(Mesa).filter(Mesa.id == mesa_id).first()
+    if not mesa:
+        raise HTTPException(status_code=404, detail="Mesa no encontrada")
+
+    db.delete(mesa)
+    db.commit()
+    return None
+
 @router.patch("/{mesa_id}/regenerar-qr", response_model=MesaResponse)
 def regenerar_qr(
     mesa_id: int,

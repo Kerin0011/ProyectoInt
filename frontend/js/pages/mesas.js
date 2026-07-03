@@ -29,9 +29,9 @@ async function renderMesasPage(container) {
                                 data-id="${m.id}" data-estado="${m.estado}" id="mesa-toggle-${m.id}">
                                 ${m.estado === 'libre' ? 'Ocupar' : 'Liberar'}
                             </button>
-                            <button class="btn btn-sm btn-outline-warning regenerar-qr-btn"
-                                data-id="${m.id}" id="mesa-regen-${m.id}">
-                                Regenerar QR
+                            <button class="btn btn-sm btn-outline-danger eliminar-mesa-btn"
+                                data-id="${m.id}" id="mesa-del-${m.id}">
+                                Eliminar
                             </button>
                         </div>
                     </div>
@@ -104,6 +104,33 @@ async function renderMesasPage(container) {
                 } catch (err) {
                     this.disabled = false;
                     this.textContent = "Regenerar QR";
+                    showToast(err.message, "danger");
+                }
+            });
+        });
+
+        document.querySelectorAll(".eliminar-mesa-btn").forEach(btn => {
+            btn.addEventListener("click", async function () {
+                const id = this.dataset.id;
+                const ok = await showConfirm(
+                    "Eliminar Mesa",
+                    "Esta accion no se puede deshacer. Los pedidos asociados a esta mesa se mantendran.",
+                    "Eliminar",
+                    "danger"
+                );
+                if (!ok) return;
+
+                this.disabled = true;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+
+                try {
+                    await api.del(`/api/mesas/${id}`);
+                    mesas = mesas.filter(m => m.id != id);
+                    renderMesasPage(container);
+                    showToast("Mesa eliminada", "success");
+                } catch (err) {
+                    this.disabled = false;
+                    this.textContent = "Eliminar";
                     showToast(err.message, "danger");
                 }
             });

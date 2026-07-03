@@ -1080,6 +1080,61 @@ body {
     box-shadow: 0 4px 16px rgba(212,116,43,0.35);
 }
 
+/* ---- Ingredient Config Rows (Platos form) ---- */
+.ing-config-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    background: #faf7f2;
+    border-radius: 12px;
+    flex-wrap: wrap;
+    transition: background 0.2s;
+}
+
+.ing-config-row:hover {
+    background: #f5efe5;
+}
+
+.ing-config-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    min-width: 140px;
+    flex: 1;
+}
+
+.ing-config-check input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.ing-config-row .ing-tipo-select {
+    width: 200px;
+    font-size: 13px;
+}
+
+.ing-config-removable {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #6b5e51;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.ing-config-removable input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
 /* ---- Empty State ---- */
 .empty-state {
     text-align: center;
@@ -1372,6 +1427,15 @@ body {
         display: block;
         margin-right: 0;
         margin-bottom: 6px;
+    }
+
+    .ing-config-row {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .ing-config-row .ing-tipo-select {
+        width: 100%;
     }
 
     /* -- Login -- */

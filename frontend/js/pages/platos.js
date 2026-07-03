@@ -120,14 +120,33 @@ async function renderPlatosPage(container) {
                         </div>
                             <div class="mb-3">
                                 <label class="form-label">Ingredientes</label>
-                                <div id="ingredientes-checkboxes">
+                                <div id="ingredientes-config">
                                     ${ingredientes.map(ing => {
                                         const pi = plato?.ingredientes?.find(i => i.ingrediente_id === ing.id);
-                                        return `<div class="form-check form-check-inline">
-                                            <input class="form-check-input ing-check" type="checkbox"
-                                                id="ing-${ing.id}" value="${ing.id}"
-                                                ${pi ? "checked" : ""}>
-                                            <label class="form-check-label" for="ing-${ing.id}">${ing.nombre}</label>
+                                        const isChecked = !!pi;
+                                        const tipo = pi ? (pi.es_extra ? "extra" : "default") : "default";
+                                        const removable = pi ? pi.es_removible : false;
+                                        return `<div class="ing-config-row" id="ing-conf-${ing.id}">
+                                            <label class="ing-config-check">
+                                                <input class="form-check-input ing-check" type="checkbox"
+                                                    id="ing-${ing.id}" value="${ing.id}"
+                                                    ${isChecked ? "checked" : ""}
+                                                    onchange="window._toggleIngRow(${ing.id})">
+                                                <span>${ing.nombre}</span>
+                                            </label>
+                                            <select class="form-select ing-tipo-select" id="ing-tipo-${ing.id}"
+                                                ${isChecked ? "" : "disabled"}>
+                                                <option value="default" ${tipo === "default" ? "selected" : ""}>Incluido</option>
+                                                <option value="extra" ${tipo === "extra" ? "selected" : ""}>Extra (+${formatPrice(ing.precio_extra)})</option>
+                                            </select>
+                                            <label class="ing-config-removable" id="ing-rem-label-${ing.id}"
+                                                style="${tipo === "extra" ? "opacity:0.4;pointer-events:none" : ""}">
+                                                <input class="form-check-input ing-removable-check" type="checkbox"
+                                                    id="ing-rem-${ing.id}"
+                                                    ${removable ? "checked" : ""}
+                                                    ${tipo === "extra" ? "disabled" : ""}>
+                                                <span>Se puede quitar</span>
+                                            </label>
                                         </div>`;
                                     }).join("")}
                                 </div>
@@ -142,6 +161,21 @@ async function renderPlatosPage(container) {
             </div>
         </div>`;
 
+        document.querySelectorAll(".ing-tipo-select").forEach(sel => {
+            sel.addEventListener("change", function () {
+                const ingId = this.id.replace("ing-tipo-", "");
+                const removableLabel = document.getElementById(`ing-rem-label-${ingId}`);
+                const removableCheck = document.getElementById(`ing-rem-${ingId}`);
+                if (this.value === "extra") {
+                    if (removableLabel) removableLabel.style.opacity = "0.4";
+                    if (removableCheck) { removableCheck.disabled = true; removableCheck.checked = false; }
+                } else {
+                    if (removableLabel) removableLabel.style.opacity = "";
+                    if (removableCheck) removableCheck.disabled = false;
+                }
+            });
+        });
+
         document.getElementById("btn-guardar-plato").addEventListener("click", async () => {
             const nombre = document.getElementById("fp-nombre").value;
             const descripcion = document.getElementById("fp-descripcion").value || null;
@@ -151,11 +185,17 @@ async function renderPlatosPage(container) {
 
             const selectedIngs = [];
             document.querySelectorAll(".ing-check:checked").forEach(cb => {
+                const ingId = cb.value;
+                const tipoSelect = document.getElementById(`ing-tipo-${ingId}`);
+                const tipo = tipoSelect ? tipoSelect.value : "default";
+                const removableCheck = document.getElementById(`ing-rem-${ingId}`);
+                const esRemovible = removableCheck ? removableCheck.checked : false;
+
                 selectedIngs.push({
-                    ingrediente_id: parseInt(cb.value),
-                    es_default: true,
-                    es_extra: false,
-                    es_removible: false
+                    ingrediente_id: parseInt(ingId),
+                    es_default: tipo === "default",
+                    es_extra: tipo === "extra",
+                    es_removible: tipo === "default" ? esRemovible : false
                 });
             });
 
@@ -190,3 +230,20 @@ async function renderPlatosPage(container) {
 }
 
 router.register("/platos", renderPlatosPage);
+
+window._toggleIngRow = function(ingId) {
+    const cb = document.getElementById(`ing-${ingId}`);
+    const tipoSelect = document.getElementById(`ing-tipo-${ingId}`);
+    const removableLabel = document.getElementById(`ing-rem-label-${ingId}`);
+    const removableCheck = document.getElementById(`ing-rem-${ingId}`);
+    const isChecked = cb && cb.checked;
+
+    if (tipoSelect) tipoSelect.disabled = !isChecked;
+    if (isChecked) {
+        if (removableLabel) removableLabel.style.opacity = "";
+        if (removableCheck) removableCheck.disabled = false;
+    } else {
+        if (removableLabel) removableLabel.style.opacity = "0.4";
+        if (removableCheck) { removableCheck.disabled = true; removableCheck.checked = false; }
+    }
+};
