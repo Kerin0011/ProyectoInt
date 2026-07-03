@@ -2,7 +2,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.models.database import get_db
-from app.models.models import Mesa, Usuario
+from app.models.models import Mesa, Usuario, Pedido, DetallePedido, Solicitud
 from app.schemas.schemas import MesaCreate, MesaResponse, EstadoUpdate
 from app.services.auth import get_current_user, require_role
 
@@ -88,6 +88,10 @@ def eliminar_mesa(
     if not mesa:
         raise HTTPException(status_code=404, detail="Mesa no encontrada")
 
+    db.query(Solicitud).filter(Solicitud.mesa_id == mesa_id).delete()
+    for pedido in db.query(Pedido).filter(Pedido.mesa_id == mesa_id).all():
+        db.query(DetallePedido).filter(DetallePedido.pedido_id == pedido.id).delete()
+    db.query(Pedido).filter(Pedido.mesa_id == mesa_id).delete()
     db.delete(mesa)
     db.commit()
     return None

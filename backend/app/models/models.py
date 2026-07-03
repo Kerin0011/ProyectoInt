@@ -66,7 +66,8 @@ class Mesa(Base):
     token_qr = Column(String(64), unique=True, nullable=False)
     estado = Column(SQLEnum(EstadoMesa), default=EstadoMesa.libre)
 
-    pedidos = relationship("Pedido", back_populates="mesa")
+    pedidos = relationship("Pedido", back_populates="mesa", cascade="all, delete-orphan", passive_deletes=True)
+    solicitudes = relationship("Solicitud", back_populates="mesa", cascade="all, delete-orphan")
 
 
 class Categoria(Base):
