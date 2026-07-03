@@ -1347,6 +1347,11 @@ body {
         font-size: 1rem;
     }
 
+    #mesas-grid .btn {
+        font-size: 11px;
+        padding: 5px 8px;
+    }
+
     .qr-display code {
         font-size: 9px !important;
         word-break: break-all;

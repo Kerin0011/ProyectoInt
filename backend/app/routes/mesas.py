@@ -76,3 +76,25 @@ def cambiar_estado_mesa(
         token_qr=mesa.token_qr,
         estado=mesa.estado.value
     )
+
+
+@router.patch("/{mesa_id}/regenerar-qr", response_model=MesaResponse)
+def regenerar_qr(
+    mesa_id: int,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(require_role("admin"))
+):
+    mesa = db.query(Mesa).filter(Mesa.id == mesa_id).first()
+    if not mesa:
+        raise HTTPException(status_code=404, detail="Mesa no encontrada")
+
+    mesa.token_qr = str(uuid.uuid4())
+    db.commit()
+    db.refresh(mesa)
+
+    return MesaResponse(
+        id=mesa.id,
+        numero=mesa.numero,
+        token_qr=mesa.token_qr,
+        estado=mesa.estado.value
+    )

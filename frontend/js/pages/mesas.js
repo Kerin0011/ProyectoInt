@@ -25,9 +25,13 @@ async function renderMesasPage(container) {
                                     <code style="font-size:9px;word-break:break-all">${window.location.origin}${window.location.pathname}#/menu/${m.token_qr}</code>
                                 </div>
                             </div>
-                            <button class="btn btn-sm btn-outline-secondary toggle-mesa-btn mt-auto"
+                            <button class="btn btn-sm btn-outline-secondary toggle-mesa-btn mt-auto mb-1"
                                 data-id="${m.id}" data-estado="${m.estado}" id="mesa-toggle-${m.id}">
                                 ${m.estado === 'libre' ? 'Ocupar' : 'Liberar'}
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning regenerar-qr-btn"
+                                data-id="${m.id}" id="mesa-regen-${m.id}">
+                                Regenerar QR
                             </button>
                         </div>
                     </div>
@@ -73,6 +77,33 @@ async function renderMesasPage(container) {
                 } catch (err) {
                     if (mesa) mesa.estado = estado;
                     updateMesaCard(id, estado);
+                    showToast(err.message, "danger");
+                }
+            });
+        });
+        document.querySelectorAll(".regenerar-qr-btn").forEach(btn => {
+            btn.addEventListener("click", async function () {
+                const id = this.dataset.id;
+                const ok = await showConfirm(
+                    "Regenerar QR",
+                    "Esto cambiara el codigo QR de esta mesa. Los QR anteriores dejaran de funcionar.",
+                    "Regenerar",
+                    "warning"
+                );
+                if (!ok) return;
+
+                this.disabled = true;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+
+                try {
+                    const res = await api.patch(`/api/mesas/${id}/regenerar-qr`);
+                    const mesa = mesas.find(m => m.id == id);
+                    if (mesa) mesa.token_qr = res.token_qr;
+                    renderMesasPage(container);
+                    showToast("QR regenerado", "success");
+                } catch (err) {
+                    this.disabled = false;
+                    this.textContent = "Regenerar QR";
                     showToast(err.message, "danger");
                 }
             });
