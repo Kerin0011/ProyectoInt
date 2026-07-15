@@ -1,4 +1,9 @@
-const CACHE_NAME = "nexora-v1";
+// Bump this on every frontend change that must reach users. The service worker
+// caches index.html itself, so the ?v= query on the assets cannot bust it:
+// a stale index.html just keeps asking for the old ?v=. Changing this constant
+// changes sw.js, which is what makes the browser install it and drop the old
+// caches on activate.
+const CACHE_NAME = "nexora-v2";
 
 const LOCAL_ASSETS = [
   "./",

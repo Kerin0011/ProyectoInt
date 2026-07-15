@@ -167,3 +167,50 @@ INSERT INTO platos (nombre, descripcion, precio_base, categoria_id, disponible) 
 ('Ensalada Cesar', 'Lechuga, pollo, crutones, aderezo', 12000.00, 1, 1),
 ('Cafe Americano', 'Cafe negro tradicional', 4000.00, 3, 1),
 ('Brownie con Helado', 'Brownie caliente con helado de vainilla', 10000.00, 4, 1);
+
+-- Composicion de cada plato. Sin estas filas los platos no se pueden
+-- personalizar y sus ingredientes base nunca se descuentan del inventario.
+--
+-- es_default   : viene con el plato y consume stock
+-- es_extra     : el comensal puede agregarlo pagando precio_extra
+-- es_removible : el comensal puede quitarlo
+--
+-- Los flags son por pareja plato-ingrediente, no por ingrediente: la lechuga
+-- se puede quitar de la hamburguesa, y el cafe no se puede quitar del
+-- Cafe Americano porque entonces no es nada.
+INSERT INTO plato_ingredientes (plato_id, ingrediente_id, es_default, es_extra, es_removible, cantidad_default) VALUES
+-- 1. Hamburguesa Clasica
+(1, 5,  1, 0, 0, 1),   -- Carne de res
+(1, 4,  1, 0, 1, 1),   -- Pan
+(1, 7,  1, 0, 1, 1),   -- Lechuga
+(1, 8,  1, 0, 1, 1),   -- Tomate
+(1, 9,  1, 0, 1, 1),   -- Cebolla
+(1, 10, 1, 0, 1, 1),   -- Salsa de tomate
+(1, 1,  0, 1, 0, 1),   -- Queso extra
+(1, 2,  0, 1, 0, 1),   -- Tocineta
+(1, 3,  0, 1, 0, 1),   -- Aguacate
+-- 2. Sandwich de Pollo
+(2, 6,  1, 0, 0, 1),   -- Pollo
+(2, 4,  1, 0, 1, 1),   -- Pan
+(2, 7,  1, 0, 1, 1),   -- Lechuga
+(2, 8,  1, 0, 1, 1),   -- Tomate
+(2, 1,  0, 1, 0, 1),   -- Queso extra
+(2, 2,  0, 1, 0, 1),   -- Tocineta
+(2, 3,  0, 1, 0, 1),   -- Aguacate
+-- 3. Pasta Alfredo
+(3, 11, 1, 0, 0, 1),   -- Pasta
+(3, 6,  1, 0, 1, 1),   -- Pollo
+(3, 1,  0, 1, 0, 1),   -- Queso extra
+(3, 2,  0, 1, 0, 1),   -- Tocineta
+-- 4. Ensalada Cesar
+(4, 7,  1, 0, 0, 1),   -- Lechuga
+(4, 6,  1, 0, 1, 1),   -- Pollo
+(4, 8,  1, 0, 1, 1),   -- Tomate
+(4, 1,  0, 1, 0, 1),   -- Queso extra
+(4, 3,  0, 1, 0, 1),   -- Aguacate
+-- 5. Cafe Americano
+(5, 14, 1, 0, 0, 1),   -- Cafe
+(5, 13, 1, 0, 1, 1),   -- Azucar
+-- 6. Brownie con Helado
+(6, 16, 1, 0, 0, 1),   -- Brownie
+(6, 15, 1, 0, 1, 1);   -- Helado de vainilla

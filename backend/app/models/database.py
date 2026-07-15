@@ -64,6 +64,15 @@ def run_migrations():
             "stock_inicial",
             f"UPDATE ingredientes SET stock = {STOCK_INICIAL_POR_DEFECTO} WHERE stock <= 0",
         ),
+        # Dishes were created with their ingredients attached but with every
+        # flag off, so nothing could be removed and only one dish showed as
+        # customizable. Base ingredients become removable; the admin can untick
+        # the ones that make no sense for a given dish.
+        (
+            "ingredientes_removibles",
+            "UPDATE plato_ingredientes SET es_removible = 1 "
+            "WHERE es_default = 1 AND es_extra = 0",
+        ),
     ]
 
     try:

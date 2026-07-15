@@ -1756,8 +1756,10 @@ body {
     color: #c9a689;
     opacity: 0.85;
 }
-.menu-app .product-card.placeholder .card-img .img-placeholder-icon,
-.menu-app .product-card .card-img.placeholder .img-placeholder-icon {
+/* "sin-imagen", no "placeholder": Bootstrap owns .placeholder for its loading
+   skeletons and forces opacity 0.5 on anything carrying it. */
+.menu-app .product-card.sin-imagen .card-img .img-placeholder-icon,
+.menu-app .product-card .card-img.sin-imagen .img-placeholder-icon {
     display: inline-flex;
 }
 

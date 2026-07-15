@@ -155,7 +155,7 @@ function plainCartQty(platoId) {
 function cardImageHTML(p) {
     if (p.imagen_url) {
         return `<img src="${escapeHtml(p.imagen_url)}" alt="${escapeHtml(p.nombre)}" loading="lazy"
-            onerror="this.style.display='none';this.parentElement.classList.add('placeholder')">
+            onerror="this.style.display='none';this.parentElement.classList.add('sin-imagen')">
             <span class="img-placeholder-icon">${Icons.icon('utensils', 34)}</span>`;
     }
     return `<span class="img-placeholder-icon">${Icons.icon('utensils', 34)}</span>`;
@@ -176,7 +176,7 @@ function cardControlHTML(p) {
 function productCardHTML(p) {
     const hasCustom = (p.ingredientes || []).some(i => i.es_extra || i.es_removible);
     return `
-        <div class="product-card${p.imagen_url ? '' : ' placeholder'}" onclick="window.abrirPersonalizacion(${p.id})">
+        <div class="product-card${p.imagen_url ? '' : ' sin-imagen'}" onclick="window.abrirPersonalizacion(${p.id})">
             <div class="card-img">
                 ${cardImageHTML(p)}
                 ${p.destacado ? `<span class="card-badge-destacado">${Icons.icon('star', 12)} Recomendado</span>` : ""}
