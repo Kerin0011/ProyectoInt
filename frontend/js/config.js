@@ -1,6 +1,9 @@
-// Name of the restaurant using Nexora. This is the one value that changes per
-// client, and it is what the diner sees on the public menu. "Nexora" is the
-// product name and belongs in the staff panel, never on the diner's screen.
+// Name of the restaurant this deployment is sold to. It titles the staff panel
+// and the public menu, and it is the one value that changes per client.
+//
+// "Nexora" is the product name and only shows on the way in: the login screen,
+// the browser tab and the installable app. Once inside, the panel belongs to
+// the restaurant, not to us.
 const RESTAURANT_NAME = "Mi Restaurante";
 
 const API_BASE = (function () {
