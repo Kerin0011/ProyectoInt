@@ -5,7 +5,7 @@ async function renderLoginPage(container) {
             <div class="card-body p-4">
                 <div class="text-center mb-4">
                     <span class="text-primary" style="display:inline-flex">${Icons.icon('shop', 56)}</span>
-                    <h3 class="mt-2">Restaurant Order</h3>
+                    <h3 class="mt-2">Nexora</h3>
                     <p class="text-muted">Inicia sesion para continuar</p>
                 </div>
                 <form id="login-form">

@@ -36,6 +36,7 @@ async function renderPedidosPage(container) {
                                         <br><small class="text-muted">
                                             ${d.personalizaciones.map(pe => pe.accion + ": " + pe.ingrediente_nombre).join(", ")}
                                         </small>` : ""}
+                                    ${d.nota ? `<br><small class="text-warning-emphasis fw-semibold">${Icons.iconSpan('note', 'me-1')}${d.nota}</small>` : ""}
                                 </td>
                                 <td>${d.cantidad}</td>
                                 <td>${formatPrice(d.precio_unitario)}</td>

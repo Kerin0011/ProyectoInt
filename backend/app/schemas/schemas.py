@@ -1,5 +1,5 @@
-from pydantic import BaseModel, EmailStr
-from typing import Optional
+from pydantic import BaseModel, EmailStr, Field
+from typing import Literal, Optional
 from datetime import datetime
 
 
@@ -16,10 +16,10 @@ class TokenResponse(BaseModel):
 
 
 class UsuarioCreate(BaseModel):
-    nombre: str
+    nombre: str = Field(min_length=1, max_length=100)
     email: EmailStr
-    password: str
-    rol_id: int
+    password: str = Field(min_length=6, max_length=72)
+    rol_id: int = Field(gt=0)
 
 
 class UsuarioResponse(BaseModel):
@@ -34,7 +34,7 @@ class UsuarioResponse(BaseModel):
 
 
 class MesaCreate(BaseModel):
-    numero: str
+    numero: str = Field(min_length=1, max_length=10)
 
 
 class MesaResponse(BaseModel):
@@ -48,10 +48,10 @@ class MesaResponse(BaseModel):
 
 
 class IngredienteCreate(BaseModel):
-    nombre: str
-    stock: int = 0
+    nombre: str = Field(min_length=1, max_length=100)
+    stock: int = Field(default=0, ge=0)
     disponible: bool = True
-    precio_extra: float = 0.00
+    precio_extra: float = Field(default=0.00, ge=0)
 
 
 class IngredienteResponse(BaseModel):
@@ -66,20 +66,21 @@ class IngredienteResponse(BaseModel):
 
 
 class PlatoIngredienteSchema(BaseModel):
-    ingrediente_id: int
+    ingrediente_id: int = Field(gt=0)
     es_default: bool = True
     es_extra: bool = False
     es_removible: bool = False
-    cantidad_default: int = 1
+    cantidad_default: int = Field(default=1, gt=0)
 
 
 class PlatoCreate(BaseModel):
-    nombre: str
+    nombre: str = Field(min_length=1, max_length=150)
     descripcion: Optional[str] = None
-    precio_base: float
-    categoria_id: int
+    precio_base: float = Field(gt=0)
+    categoria_id: int = Field(gt=0)
     disponible: bool = True
-    imagen_url: Optional[str] = None
+    destacado: bool = False
+    imagen_url: Optional[str] = Field(default=None, max_length=500)
     ingredientes: list[PlatoIngredienteSchema] = []
 
 
@@ -91,6 +92,7 @@ class PlatoResponse(BaseModel):
     categoria_id: int
     categoria_nombre: Optional[str] = None
     disponible: bool
+    destacado: bool = False
     imagen_url: Optional[str]
     ingredientes: list[PlatoIngredienteSchema] = []
 
@@ -99,20 +101,21 @@ class PlatoResponse(BaseModel):
 
 
 class PersonalizacionRequest(BaseModel):
-    ingrediente_id: int
-    accion: str
-    cantidad: int = 1
+    ingrediente_id: int = Field(gt=0)
+    accion: Literal["agregar", "quitar"]
+    cantidad: int = Field(default=1, gt=0, le=20)
 
 
 class DetallePedidoRequest(BaseModel):
-    plato_id: int
-    cantidad: int = 1
+    plato_id: int = Field(gt=0)
+    cantidad: int = Field(default=1, gt=0, le=50)
+    nota: Optional[str] = Field(default=None, max_length=255)
     personalizaciones: list[PersonalizacionRequest] = []
 
 
 class PedidoCreateRequest(BaseModel):
-    mesa_token: str
-    detalles: list[DetallePedidoRequest]
+    mesa_token: str = Field(min_length=1, max_length=64)
+    detalles: list[DetallePedidoRequest] = Field(min_length=1)
 
 
 class PersonalizacionResponse(BaseModel):
@@ -134,6 +137,7 @@ class DetallePedidoResponse(BaseModel):
     cantidad: int
     precio_unitario: float
     subtotal: float
+    nota: Optional[str] = None
     personalizaciones: list[PersonalizacionResponse] = []
 
     class Config:
@@ -155,7 +159,10 @@ class PedidoResponse(BaseModel):
 
 
 class EstadoUpdate(BaseModel):
-    estado: str
+    estado: Literal[
+        "pendiente", "confirmado", "en_preparacion",
+        "listo", "entregado", "cancelado"
+    ]
 
 
 class DisponibilidadUpdate(BaseModel):
@@ -163,7 +170,7 @@ class DisponibilidadUpdate(BaseModel):
 
 
 class SolicitudRequest(BaseModel):
-    tipo: str
+    tipo: Literal["mesero", "cuenta"]
 
 
 class SolicitudResponse(BaseModel):

@@ -16,7 +16,7 @@ const NavbarComponent = {
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
             <div class="container-fluid">
                 <a class="navbar-brand" href="#/dashboard">
-                    ${Icons.iconSpan('shop', 'me-1')} Restaurant Order
+                    ${Icons.iconSpan('shop', 'me-1')} Nexora
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>

@@ -1,34 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.models.database import get_db
-from app.models.models import Plato, Categoria, PlatoIngrediente, Ingrediente, Usuario
-from app.schemas.schemas import PlatoCreate, PlatoResponse, PlatoIngredienteSchema, DisponibilidadUpdate
+from app.models.models import Plato, PlatoIngrediente, Usuario
+from app.schemas.schemas import PlatoCreate, PlatoResponse, DisponibilidadUpdate
 from app.services.auth import get_current_user, require_role
+from app.services.serializers import plato_to_response
 
 router = APIRouter(prefix="/api/platos", tags=["platos"])
-
-
-def _plato_to_response(p: Plato) -> PlatoResponse:
-    return PlatoResponse(
-        id=p.id,
-        nombre=p.nombre,
-        descripcion=p.descripcion,
-        precio_base=float(p.precio_base),
-        categoria_id=p.categoria_id,
-        categoria_nombre=p.categoria.nombre if p.categoria else None,
-        disponible=p.disponible,
-        imagen_url=p.imagen_url,
-        ingredientes=[
-            PlatoIngredienteSchema(
-                ingrediente_id=pi.ingrediente_id,
-                es_default=pi.es_default,
-                es_extra=pi.es_extra,
-                es_removible=pi.es_removible,
-                cantidad_default=pi.cantidad_default
-            )
-            for pi in p.plato_ingredientes
-        ]
-    )
 
 
 @router.get("", response_model=list[PlatoResponse])
@@ -37,7 +15,7 @@ def listar_platos(
     current_user: Usuario = Depends(get_current_user)
 ):
     platos = db.query(Plato).all()
-    return [_plato_to_response(p) for p in platos]
+    return [plato_to_response(p) for p in platos]
 
 
 @router.get("/{plato_id}", response_model=PlatoResponse)
@@ -49,7 +27,7 @@ def obtener_plato(
     p = db.query(Plato).filter(Plato.id == plato_id).first()
     if not p:
         raise HTTPException(status_code=404, detail="Plato no encontrado")
-    return _plato_to_response(p)
+    return plato_to_response(p)
 
 
 @router.post("", response_model=PlatoResponse, status_code=201)
@@ -64,6 +42,7 @@ def crear_plato(
         precio_base=data.precio_base,
         categoria_id=data.categoria_id,
         disponible=data.disponible,
+        destacado=data.destacado,
         imagen_url=data.imagen_url
     )
     db.add(plato)
@@ -82,7 +61,7 @@ def crear_plato(
 
     db.commit()
     db.refresh(plato)
-    return _plato_to_response(plato)
+    return plato_to_response(plato)
 
 
 @router.put("/{plato_id}", response_model=PlatoResponse)
@@ -92,7 +71,6 @@ def editar_plato(
     db: Session = Depends(get_db),
     current_user: Usuario = Depends(require_role("admin"))
 ):
-    print(f"PUT /api/platos/{plato_id} — nombre={data.nombre}, precio={data.precio_base}, cat={data.categoria_id}, ings={len(data.ingredientes)}")
     p = db.query(Plato).filter(Plato.id == plato_id).first()
     if not p:
         raise HTTPException(status_code=404, detail="Plato no encontrado")
@@ -102,6 +80,7 @@ def editar_plato(
     p.precio_base = data.precio_base
     p.categoria_id = data.categoria_id
     p.disponible = data.disponible
+    p.destacado = data.destacado
     p.imagen_url = data.imagen_url
 
     db.query(PlatoIngrediente).filter(PlatoIngrediente.plato_id == plato_id).delete()
@@ -120,10 +99,9 @@ def editar_plato(
         db.commit()
     except Exception as e:
         db.rollback()
-        print(f"PUT /api/platos/{plato_id} COMMIT ERROR: {e}")
         raise HTTPException(status_code=500, detail=str(e))
     db.refresh(p)
-    return _plato_to_response(p)
+    return plato_to_response(p)
 
 
 @router.delete("/{plato_id}", status_code=204)
@@ -153,4 +131,4 @@ def toggle_disponibilidad(
     p.disponible = data.disponible
     db.commit()
     db.refresh(p)
-    return _plato_to_response(p)
+    return plato_to_response(p)

@@ -1,3 +1,15 @@
+// FastAPI reports error detail two ways: a string for the errors we raise
+// ourselves (HTTPException), and a list of objects when Pydantic rejects the
+// body (422). Without this, a 422 would show "[object Object]" in the toast.
+function mensajeDeError(detail) {
+    if (!detail) return "Ocurrio un error";
+    if (typeof detail === "string") return detail;
+    if (Array.isArray(detail)) {
+        return detail.map(d => d.msg || "").filter(Boolean).join(". ") || "Datos invalidos";
+    }
+    return "Ocurrio un error";
+}
+
 const api = {
     headers() {
         const token = localStorage.getItem("token");
@@ -6,45 +18,35 @@ const api = {
         return h;
     },
 
-    async get(path) {
-        const res = await fetch(API_BASE + path, { headers: this.headers() });
+    async request(path, options = {}) {
+        const res = await fetch(API_BASE + path, { headers: this.headers(), ...options });
         if (res.status === 401) { handle401(); return null; }
-        if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || "Error"); }
+        if (!res.ok) {
+            const e = await res.json().catch(() => ({}));
+            throw new Error(mensajeDeError(e.detail));
+        }
         if (res.status === 204) return null;
         return res.json();
     },
 
-    async post(path, body) {
-        const res = await fetch(API_BASE + path, {
-            method: "POST", headers: this.headers(), body: JSON.stringify(body)
-        });
-        if (res.status === 401) { handle401(); return null; }
-        if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || "Error"); }
-        return res.json();
+    get(path) {
+        return this.request(path);
     },
 
-    async put(path, body) {
-        const res = await fetch(API_BASE + path, {
-            method: "PUT", headers: this.headers(), body: JSON.stringify(body)
-        });
-        if (res.status === 401) { handle401(); return null; }
-        if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || "Error"); }
-        return res.json();
+    post(path, body) {
+        return this.request(path, { method: "POST", body: JSON.stringify(body) });
     },
 
-    async patch(path, body) {
-        const res = await fetch(API_BASE + path, {
-            method: "PATCH", headers: this.headers(), body: JSON.stringify(body)
-        });
-        if (res.status === 401) { handle401(); return null; }
-        if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || "Error"); }
-        return res.json();
+    put(path, body) {
+        return this.request(path, { method: "PUT", body: JSON.stringify(body) });
+    },
+
+    patch(path, body) {
+        return this.request(path, { method: "PATCH", body: JSON.stringify(body) });
     },
 
     async del(path) {
-        const res = await fetch(API_BASE + path, { method: "DELETE", headers: this.headers() });
-        if (res.status === 401) { handle401(); return null; }
-        if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || "Error"); }
+        await this.request(path, { method: "DELETE" });
         return null;
     }
 };

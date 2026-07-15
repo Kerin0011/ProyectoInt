@@ -1731,3 +1731,291 @@ body {
         transform: scale(0.96);
     }
 }
+
+/* =============================================
+   MENU v3 — Recomendados, stepper, nota, barra fija
+   ============================================= */
+
+/* Precios con cifras tabulares (no bailan al cambiar cantidad) */
+.menu-app .card-price,
+.menu-app .cart-bar-total,
+.menu-app .customization-price,
+.menu-app .cart-total-price,
+.menu-app .cart-item-price,
+.menu-app #btn-add-cart-total {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+}
+
+/* ---- Placeholder SVG en vez de emoji ---- */
+.menu-app .product-card .card-img {
+    font-size: 0;
+}
+.menu-app .product-card .card-img .img-placeholder-icon {
+    display: none;
+    color: #c9a689;
+    opacity: 0.85;
+}
+.menu-app .product-card.placeholder .card-img .img-placeholder-icon,
+.menu-app .product-card .card-img.placeholder .img-placeholder-icon {
+    display: inline-flex;
+}
+
+/* ---- Badge "Recomendado" sobre la imagen ---- */
+.menu-app .card-badge-destacado {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(45,33,24,0.82);
+    color: #ffd27a;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    padding: 4px 9px;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
+}
+.menu-app .card-badge-destacado svg { color: #ffcf5c; }
+
+/* ---- Hint "Personalizable" ---- */
+.menu-app .card-custom-hint {
+    margin-top: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #b8926f;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* ---- Seccion Recomendados (scroll horizontal) ---- */
+.menu-app .featured-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #c25d1f;
+}
+.menu-app .featured-header svg { color: #e8a33a; }
+
+.menu-app .featured-scroll {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    padding: 8px 20px 6px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.menu-app .featured-scroll::-webkit-scrollbar { display: none; }
+.menu-app .featured-scroll .product-card {
+    flex: 0 0 210px;
+    scroll-snap-align: start;
+}
+
+/* ---- Stepper de cantidad (card + modal) ---- */
+.menu-app .qty-stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #f5efe5;
+    border-radius: 24px;
+    padding: 3px;
+}
+.menu-app .qty-step-btn {
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 50%;
+    background: #fff;
+    color: #c25d1f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+.menu-app .qty-step-btn:hover { background: #fff6ec; }
+.menu-app .qty-step-btn:active { transform: scale(0.9); }
+.menu-app .qty-step-count {
+    min-width: 22px;
+    text-align: center;
+    font-weight: 800;
+    font-size: 15px;
+    color: #2d2118;
+    font-variant-numeric: tabular-nums;
+}
+/* En la card el control debe caber junto al precio */
+.menu-app .card-control { flex-shrink: 0; }
+
+/* Stepper grande en el modal */
+.menu-app .qty-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 18px;
+}
+.menu-app .qty-row-label {
+    font-size: 15px;
+    font-weight: 700;
+    color: #2d2118;
+}
+.menu-app .qty-stepper-modal .qty-step-btn { width: 44px; height: 44px; }
+.menu-app .qty-stepper-modal .qty-step-count { font-size: 18px; min-width: 30px; }
+
+/* ---- Campo de nota en el modal ---- */
+.menu-app .customization-desc {
+    font-size: 13px;
+    color: #8c7569;
+    margin: -4px 0 14px;
+    line-height: 1.45;
+}
+.menu-app .nota-field {
+    margin-top: 16px;
+}
+.menu-app .nota-field label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #6b5e51;
+    margin-bottom: 6px;
+}
+.menu-app .nota-field .nota-optional {
+    font-weight: 400;
+    color: #b8a494;
+}
+.menu-app .nota-field textarea {
+    width: 100%;
+    border: 2px solid #e8ddd0;
+    border-radius: 14px;
+    padding: 10px 12px;
+    font-size: 15px;
+    font-family: inherit;
+    color: #2d2118;
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s ease;
+    background: #fdfbf7;
+}
+.menu-app .nota-field textarea:focus {
+    border-color: #d4742b;
+    background: #fff;
+}
+.menu-app .nota-field textarea::placeholder { color: #c4b5a5; }
+
+/* ---- Nota en el carrito ---- */
+.menu-app .cart-item-note {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #c25d1f;
+    margin-top: 3px;
+    font-style: italic;
+}
+
+/* ---- Barra fija inferior del carrito ---- */
+.menu-app #menu-cartbar { }
+body.has-cart-bar .menu-app { padding-bottom: 96px; }
+
+.menu-app .cart-bar {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    width: calc(100% - 32px);
+    max-width: 560px;
+    z-index: 250;
+    background: linear-gradient(135deg, #d4742b, #c25d1f);
+    color: #fff;
+    border-radius: 18px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 8px 28px rgba(194,93,31,0.42);
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.2s ease;
+    animation: cartBarIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.menu-app .cart-bar:hover { box-shadow: 0 10px 34px rgba(194,93,31,0.55); }
+.menu-app .cart-bar:active { transform: translateX(-50%) scale(0.98); }
+
+@keyframes cartBarIn {
+    from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+    to   { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+
+.menu-app .cart-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.menu-app .cart-bar-icon {
+    position: relative;
+    display: inline-flex;
+}
+.menu-app .cart-bar-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #fff;
+    color: #c25d1f;
+    font-size: 11px;
+    font-weight: 800;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+    font-variant-numeric: tabular-nums;
+}
+.menu-app .cart-bar-label {
+    font-size: 16px;
+    font-weight: 700;
+}
+.menu-app .cart-bar-total {
+    font-size: 18px;
+    font-weight: 800;
+}
+
+/* ---- Estrella en tabla admin de platos ---- */
+.badge-destacado {
+    display: inline-flex;
+    align-items: center;
+    color: #e8a33a;
+    vertical-align: middle;
+}
+
+/* ---- Accesibilidad: focus visible ---- */
+.menu-app .qty-step-btn:focus-visible,
+.menu-app .btn-add:focus-visible,
+.menu-app .quick-btn:focus-visible,
+.menu-app .cart-bar:focus-visible,
+.menu-app .category-pill:focus-visible,
+.menu-app .nota-field textarea:focus-visible {
+    outline: 3px solid rgba(212,116,43,0.5);
+    outline-offset: 2px;
+}
+
+/* ---- Respeto a prefers-reduced-motion ---- */
+@media (prefers-reduced-motion: reduce) {
+    .menu-app .hero-banner .hero-icon { animation: none; }
+    .menu-app .cart-bar { animation: none; }
+    .menu-app *,
+    .menu-app *::before,
+    .menu-app *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+    }
+}

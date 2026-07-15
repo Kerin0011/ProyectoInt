@@ -4,42 +4,57 @@ let menuData = null;
 let activeCategory = "todas";
 let searchQuery = "";
 
-const FOOD_EMOJIS = ["🍔", "🍕", "🥗", "🍝", "🥩", "🍗", "🌮", "🥘", "🍜", "🍰", "🥤", "☕", "🧁", "🍩", "🥪", "🍟"];
-
-function foodEmoji(index) {
-    return FOOD_EMOJIS[index % FOOD_EMOJIS.length];
+function menuOfflineHTML(container, mensaje) {
+    container.innerHTML = `<div class="menu-app"><div class="empty-state" style="padding-top:80px">${Icons.icon('xCircle', 48)}<p>${mensaje}</p></div></div>`;
 }
 
 async function renderMenuPublicoPage(container) {
     const hash = window.location.hash.slice(1);
     mesaToken = hash.replace("/menu/", "");
+    const cacheKey = "cached_menu_" + mesaToken;
+
+    let loaded = null;
 
     try {
-        menuData = await fetch(`${API_BASE}/api/public/menu/${mesaToken}`).then(r => r.json());
-        try {
-            localStorage.setItem("cached_menu_" + mesaToken, JSON.stringify({ data: menuData, ts: Date.now() }));
-        } catch {}
-    } catch (err) {
-        try {
-            const cached = localStorage.getItem("cached_menu_" + mesaToken);
-            if (cached) {
-                menuData = JSON.parse(cached).data;
-                showToast("Mostrando menu sin conexion", "warning");
-            } else {
-                container.innerHTML = `<div class="menu-app"><div class="empty-state" style="padding-top:80px">${Icons.icon('xCircle', 48)}<p>Sin conexion. Conectate a internet para ver el menu.</p></div></div>`;
-                return;
-            }
-        } catch {
-            container.innerHTML = `<div class="menu-app"><div class="empty-state" style="padding-top:80px">${Icons.icon('xCircle', 48)}<p>Sin conexion. Conectate a internet para ver el menu.</p></div></div>`;
+        const res = await fetch(`${API_BASE}/api/public/menu/${mesaToken}`);
+        const data = await res.json().catch(() => null);
+
+        if (res.ok && data && Array.isArray(data.categorias)) {
+            loaded = data;
+            // Only cache valid responses, never error payloads
+            try { localStorage.setItem(cacheKey, JSON.stringify({ data, ts: Date.now() })); } catch {}
+        } else if (res.status === 404) {
+            menuOfflineHTML(container, "Mesa no encontrada. Verifica el codigo QR.");
             return;
         }
+        // Anything else (5xx, or the SW serving us an offline error) falls
+        // through to the cache below.
+    } catch (err) {
+        // Genuinely offline: fall through to the cache below.
     }
 
+    if (!loaded) {
+        try {
+            const cached = localStorage.getItem(cacheKey);
+            const parsed = cached ? JSON.parse(cached).data : null;
+            if (parsed && Array.isArray(parsed.categorias)) {
+                loaded = parsed;
+                showToast("Mostrando menu sin conexion", "warning");
+            }
+        } catch {}
+    }
+
+    if (!loaded) {
+        menuOfflineHTML(container, "Sin conexion. Conectate a internet para ver el menu.");
+        return;
+    }
+
+    menuData = loaded;
     buildCache();
 
     window.platosMenu = {};
     menuData.categorias.forEach(cat => {
-        cat.platos.forEach(p => {
+        (cat.platos || []).forEach(p => {
             window.platosMenu[p.id] = p;
         });
     });
@@ -71,7 +86,7 @@ function renderShell() {
     <div class="menu-app">
         <div class="header-bar">
             <div class="restaurant-info">
-                <h1>Restaurant Order</h1>
+                <h1>Nexora</h1>
                 <div class="table-badge">
                     ${Icons.icon('globe', 14)} Mesa ${menuData.mesa}
                 </div>
@@ -103,12 +118,12 @@ function renderShell() {
         <div class="categories-scroll" id="categories-pills"></div>
         <div id="menu-products"></div>
         <div id="menu-modal-container"></div>
-        <div id="menu-fab"></div>
+        <div id="menu-cartbar"></div>
     </div>`;
 
     renderCategories();
     renderProducts();
-    updateFab();
+    updateCartBar();
 }
 
 function renderCategories() {
@@ -122,6 +137,59 @@ function renderCategories() {
     `;
 }
 
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+// Quantity of the un-customized variant, which is the one the card stepper drives
+function plainCartQty(platoId) {
+    const item = cart.find(i => i.plato_id === platoId && i.personalizaciones.length === 0 && !i.nota);
+    return item ? item.cantidad : 0;
+}
+
+function cardImageHTML(p) {
+    if (p.imagen_url) {
+        return `<img src="${escapeHtml(p.imagen_url)}" alt="${escapeHtml(p.nombre)}" loading="lazy"
+            onerror="this.style.display='none';this.parentElement.classList.add('placeholder')">
+            <span class="img-placeholder-icon">${Icons.icon('utensils', 34)}</span>`;
+    }
+    return `<span class="img-placeholder-icon">${Icons.icon('utensils', 34)}</span>`;
+}
+
+function cardControlHTML(p) {
+    const qty = plainCartQty(p.id);
+    if (qty > 0) {
+        return `<div class="qty-stepper" onclick="event.stopPropagation()">
+            <button class="qty-step-btn" aria-label="Quitar uno de ${escapeHtml(p.nombre)}" onclick="window.quickStep(${p.id}, -1)">${Icons.icon('minus', 18)}</button>
+            <span class="qty-step-count" aria-live="polite">${qty}</span>
+            <button class="qty-step-btn" aria-label="Agregar uno de ${escapeHtml(p.nombre)}" onclick="window.quickStep(${p.id}, 1)">${Icons.icon('plus', 18)}</button>
+        </div>`;
+    }
+    return `<button class="btn-add" aria-label="Agregar ${escapeHtml(p.nombre)}" onclick="event.stopPropagation(); window.quickAdd(${p.id})">${Icons.icon('plus', 20)}</button>`;
+}
+
+function productCardHTML(p) {
+    const hasCustom = (p.ingredientes || []).some(i => i.es_extra || i.es_removible);
+    return `
+        <div class="product-card${p.imagen_url ? '' : ' placeholder'}" onclick="window.abrirPersonalizacion(${p.id})">
+            <div class="card-img">
+                ${cardImageHTML(p)}
+                ${p.destacado ? `<span class="card-badge-destacado">${Icons.icon('star', 12)} Recomendado</span>` : ""}
+            </div>
+            <div class="card-body">
+                <div class="card-title">${escapeHtml(p.nombre)}</div>
+                <div class="card-desc">${escapeHtml(p.descripcion || "")}</div>
+                <div class="card-footer">
+                    <span class="card-price">${formatPrice(p.precio_base)}</span>
+                    <div class="card-control" id="card-control-${p.id}">${cardControlHTML(p)}</div>
+                </div>
+                ${hasCustom ? `<div class="card-custom-hint">${Icons.icon('note', 12)} Personalizable</div>` : ""}
+            </div>
+        </div>`;
+}
+
 function renderProducts() {
     const productsContainer = document.getElementById("menu-products");
     if (!productsContainer) return;
@@ -131,6 +199,19 @@ function renderProducts() {
         const matchSearch = !searchQuery || p.nombre.toLowerCase().includes(searchQuery.toLowerCase()) || (p.descripcion && p.descripcion.toLowerCase().includes(searchQuery.toLowerCase()));
         return matchCat && matchSearch;
     });
+
+    let html = "";
+
+    // "Recomendados" only makes sense on the unfiltered, unsearched view
+    if (activeCategory === "todas" && !searchQuery) {
+        const destacados = allPlatosCache.filter(p => p.destacado);
+        if (destacados.length) {
+            html += `<div class="section-header featured-header">${Icons.icon('star', 18)} Recomendados</div>`;
+            html += `<div class="featured-scroll">`;
+            destacados.forEach(p => { html += productCardHTML(p); });
+            html += `</div>`;
+        }
+    }
 
     const groupedByCategory = new Map();
     if (activeCategory === "todas") {
@@ -147,49 +228,50 @@ function renderProducts() {
         return;
     }
 
-    let html = "";
     groupedByCategory.forEach((platos, catName) => {
         html += `<div class="section-header">${catName}</div>`;
         html += `<div class="products-grid">`;
-        platos.forEach((p, idx) => {
-            const globalIdx = allPlatosCache.indexOf(p);
-            html += `
-                <div class="product-card" onclick="window.abrirPersonalizacion(${p.id}, '${p.nombre.replace(/'/g, "\\'")}', ${p.precio_base})">
-                    <div class="card-img">${p.imagen_url ? `<img src="${p.imagen_url}" alt="${p.nombre}" onerror="this.parentElement.innerHTML='${foodEmoji(globalIdx)}'">` : foodEmoji(globalIdx)}</div>
-                    <div class="card-body">
-                        <div class="card-title">${p.nombre}</div>
-                        <div class="card-desc">${p.descripcion || ""}</div>
-                        <div class="card-footer">
-                            <span class="card-price">${formatPrice(p.precio_base)}</span>
-                            <button class="btn-add" onclick="event.stopPropagation(); window.abrirPersonalizacion(${p.id}, '${p.nombre.replace(/'/g, "\\'")}', ${p.precio_base})">+</button>
-                        </div>
-                    </div>
-                </div>`;
-        });
+        platos.forEach(p => { html += productCardHTML(p); });
         html += `</div>`;
     });
 
     productsContainer.innerHTML = html;
 }
 
-function updateFab() {
-    const fabContainer = document.getElementById("menu-fab");
-    if (!fabContainer) return;
+function refreshCardControls() {
+    allPlatosCache.forEach(p => {
+        document.querySelectorAll(`#card-control-${p.id}`).forEach(el => {
+            el.innerHTML = cardControlHTML(p);
+        });
+    });
+}
+
+function updateCartBar() {
+    const barContainer = document.getElementById("menu-cartbar");
+    if (!barContainer) return;
     const cartCount = cart.reduce((sum, item) => sum + item.cantidad, 0);
+    const total = cart.reduce((sum, item) => sum + (item.precio_final * item.cantidad), 0);
     if (cartCount > 0) {
-        fabContainer.innerHTML = `
-        <button class="cart-fab" onclick="window.abrirCarrito()">
-            ${Icons.icon('cart', 24)}
-            <span class="cart-badge">${cartCount}</span>
-        </button>`;
+        barContainer.innerHTML = `
+        <div class="cart-bar" role="button" tabindex="0" onclick="window.abrirCarrito()"
+             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.abrirCarrito()}">
+            <div class="cart-bar-left">
+                <span class="cart-bar-icon">${Icons.icon('cart', 22)}<span class="cart-bar-badge">${cartCount}</span></span>
+                <span class="cart-bar-label">Ver pedido</span>
+            </div>
+            <span class="cart-bar-total">${formatPrice(total)}</span>
+        </div>`;
+        document.body.classList.add("has-cart-bar");
     } else {
-        fabContainer.innerHTML = "";
+        barContainer.innerHTML = "";
+        document.body.classList.remove("has-cart-bar");
     }
 }
 
+// Incremental update: a full re-render would lose the scroll position
 function refreshDisplay() {
-    renderProducts();
-    updateFab();
+    refreshCardControls();
+    updateCartBar();
 }
 
 router.register("/menu", renderMenuPublicoPage);
@@ -268,9 +350,12 @@ window.pedirCuenta = function() {
     });
 };
 
-window.abrirPersonalizacion = function(platoId, nombre, precioBase, keepState) {
+window.abrirPersonalizacion = function(platoId, keepState) {
     const plato = window.platosMenu[platoId];
     if (!plato) return;
+
+    const nombre = plato.nombre;
+    const precioBase = plato.precio_base;
 
     let c = keepState && window._currentCustomization ? window._currentCustomization : {
         platoId, nombre, precioBase,
@@ -278,6 +363,7 @@ window.abrirPersonalizacion = function(platoId, nombre, precioBase, keepState) {
         quitarIngredientes: [],
         precioExtra: 0,
         cantidad: 1,
+        nota: "",
         getTotal() { return (this.precioBase + this.precioExtra) * this.cantidad; }
     };
 
@@ -293,27 +379,42 @@ window.abrirPersonalizacion = function(platoId, nombre, precioBase, keepState) {
     window._currentCustomization = c;
 
     const currentPrice = precioBase + c.precioExtra;
+    const ingredientesHTML = buildIngredientsHTML(plato, c);
     container.innerHTML = `
-    <div class="customization-overlay" onclick="if(event.target===this)document.getElementById('menu-modal-container').innerHTML=''">
+    <div class="customization-overlay" onclick="if(event.target===this)window._cerrarModal()">
         <div class="customization-sheet" onclick="event.stopPropagation()">
             <div class="customization-header">
-                <h5>${nombre}</h5>
-                <button class="cart-modal-close" onclick="document.getElementById('menu-modal-container').innerHTML=''">&times;</button>
+                <h5>${escapeHtml(nombre)}</h5>
+                <button class="cart-modal-close" aria-label="Cerrar" onclick="window._cerrarModal()">&times;</button>
             </div>
             <div class="customization-body">
                 <div class="customization-price" id="precio-actual">${formatPrice(currentPrice)}</div>
-                <div id="custom-ingredients">
-                    ${buildIngredientsHTML(plato, c)}
+                ${plato.descripcion ? `<p class="customization-desc">${escapeHtml(plato.descripcion)}</p>` : ""}
+                ${ingredientesHTML ? `<div id="custom-ingredients">${ingredientesHTML}</div>` : ""}
+                <div class="nota-field">
+                    <label for="plato-nota">${Icons.icon('note', 14)} Nota para la cocina <span class="nota-optional">(opcional)</span></label>
+                    <textarea id="plato-nota" maxlength="255" rows="2" placeholder="Ej: sin sal, término medio, sin picante..." oninput="window._setNota(this.value)">${escapeHtml(c.nota || "")}</textarea>
                 </div>
-                <input type="number" class="qty-input" id="cantidad-plato" value="${c.cantidad}" min="1" max="20" onchange="window._setCantidad(this.value, ${platoId}, '${nombre.replace(/'/g, "\\'")}', ${precioBase})">
+                <div class="qty-row">
+                    <span class="qty-row-label">Cantidad</span>
+                    <div class="qty-stepper qty-stepper-modal">
+                        <button class="qty-step-btn" aria-label="Restar" onclick="window._stepCantidadModal(-1)">${Icons.icon('minus', 20)}</button>
+                        <span class="qty-step-count" id="cantidad-plato">${c.cantidad}</span>
+                        <button class="qty-step-btn" aria-label="Sumar" onclick="window._stepCantidadModal(1)">${Icons.icon('plus', 20)}</button>
+                    </div>
+                </div>
             </div>
             <div class="cart-modal-footer">
-                <button class="btn-add-cart" id="btn-add-cart-final" onclick="window._confirmarPersonalizacion(${platoId}, '${nombre.replace(/'/g, "\\'")}', ${precioBase})">
-                    Agregar al carrito &mdash; ${formatPrice(currentPrice * c.cantidad)}
+                <button class="btn-add-cart" id="btn-add-cart-final" onclick="window._confirmarPersonalizacion(${platoId})">
+                    Agregar al carrito &mdash; <span id="btn-add-cart-total">${formatPrice(currentPrice * c.cantidad)}</span>
                 </button>
             </div>
         </div>
     </div>`;
+};
+
+window._cerrarModal = function() {
+    document.getElementById("menu-modal-container").innerHTML = "";
 };
 
 function buildIngredientsHTML(plato, c) {
@@ -354,8 +455,11 @@ function refreshCustomizationDOM(c, plato) {
     const precioEl = document.getElementById("precio-actual");
     if (precioEl) precioEl.textContent = formatPrice(currentPrice);
 
-    const btnFinal = document.getElementById("btn-add-cart-final");
-    if (btnFinal) btnFinal.innerHTML = `Agregar al carrito &mdash; ${formatPrice(currentPrice * c.cantidad)}`;
+    const btnTotal = document.getElementById("btn-add-cart-total");
+    if (btnTotal) btnTotal.textContent = formatPrice(currentPrice * c.cantidad);
+
+    const qtyEl = document.getElementById("cantidad-plato");
+    if (qtyEl) qtyEl.textContent = c.cantidad;
 
     (plato.ingredientes || []).forEach(ing => {
         const row = document.getElementById(`ing-row-${ing.id}`);
@@ -409,17 +513,28 @@ window._toggleQuitar = function(ingId) {
     if (plato) refreshCustomizationDOM(c, plato);
 };
 
-window._setCantidad = function(value) {
+window._stepCantidadModal = function(delta) {
     const c = window._currentCustomization;
     if (!c) return;
-    c.cantidad = parseInt(value) || 1;
+    c.cantidad = Math.min(20, Math.max(1, c.cantidad + delta));
     const plato = window.platosMenu[c.platoId];
     if (plato) refreshCustomizationDOM(c, plato);
 };
 
-window._confirmarPersonalizacion = function(platoId, nombre, precioBase) {
+window._setNota = function(value) {
     const c = window._currentCustomization;
     if (!c) return;
+    c.nota = value;
+};
+
+window._confirmarPersonalizacion = function(platoId) {
+    const c = window._currentCustomization;
+    if (!c) return;
+
+    const plato = window.platosMenu[platoId];
+    const nombre = plato ? plato.nombre : c.nombre;
+    const precioBase = plato ? plato.precio_base : c.precioBase;
+    const nota = (c.nota || "").trim();
 
     const personalizaciones = [
         ...c.extraIngredientes.map(i => ({ ingrediente_id: i.id, accion: "agregar", cantidad: 1 })),
@@ -428,6 +543,7 @@ window._confirmarPersonalizacion = function(platoId, nombre, precioBase) {
 
     const existente = cart.find(item =>
         item.plato_id === platoId &&
+        (item.nota || "") === nota &&
         JSON.stringify(item.personalizaciones) === JSON.stringify(personalizaciones)
     );
 
@@ -440,11 +556,45 @@ window._confirmarPersonalizacion = function(platoId, nombre, precioBase) {
             precio_base: precioBase,
             cantidad: c.cantidad,
             personalizaciones: personalizaciones,
+            nota: nota,
             precio_final: precioBase + c.precioExtra
         });
     }
 
-    document.getElementById("menu-modal-container").innerHTML = "";
+    window._cerrarModal();
+    showToast("Agregado al carrito", "success");
+    refreshDisplay();
+};
+
+// Adds the un-customized variant straight from the card, skipping the modal
+window.quickAdd = function(platoId) {
+    const plato = window.platosMenu[platoId];
+    if (!plato) return;
+    const existente = cart.find(i => i.plato_id === platoId && i.personalizaciones.length === 0 && !i.nota);
+    if (existente) {
+        existente.cantidad++;
+    } else {
+        cart.push({
+            plato_id: platoId,
+            nombre: plato.nombre,
+            precio_base: plato.precio_base,
+            cantidad: 1,
+            personalizaciones: [],
+            nota: "",
+            precio_final: plato.precio_base
+        });
+    }
+    refreshDisplay();
+};
+
+window.quickStep = function(platoId, delta) {
+    const idx = cart.findIndex(i => i.plato_id === platoId && i.personalizaciones.length === 0 && !i.nota);
+    if (idx < 0) {
+        if (delta > 0) window.quickAdd(platoId);
+        return;
+    }
+    cart[idx].cantidad += delta;
+    if (cart[idx].cantidad <= 0) cart.splice(idx, 1);
     refreshDisplay();
 };
 
@@ -464,9 +614,10 @@ window.abrirCarrito = function() {
                     ${cart.length === 0 ? '<div class="empty-state"><p>Carrito vacio</p></div>' : cart.map((item, idx) => `
                         <div class="cart-item">
                             <div class="cart-item-info">
-                                <div class="cart-item-name">${item.nombre}</div>
+                                <div class="cart-item-name">${escapeHtml(item.nombre)}</div>
                                 ${item.personalizaciones.length > 0 ? `
                                 <div class="cart-item-custom">${item.personalizaciones.map(p => p.accion + " " + (window.platosMenu[item.plato_id]?.ingredientes?.find(i => i.id === p.ingrediente_id)?.nombre || "")).join(", ")}</div>` : ""}
+                                ${item.nota ? `<div class="cart-item-note">${Icons.icon('note', 12)} ${escapeHtml(item.nota)}</div>` : ""}
                                 <div class="cart-item-actions">
                                     <button class="cart-item-btn" onclick="window._cartDecrease(${idx})">−</button>
                                     <span class="cart-item-qty">${item.cantidad}</span>
@@ -536,6 +687,7 @@ window._confirmarPedido = async function() {
     const detalles = cart.map(item => ({
         plato_id: item.plato_id,
         cantidad: item.cantidad,
+        nota: item.nota || null,
         personalizaciones: item.personalizaciones
     }));
 

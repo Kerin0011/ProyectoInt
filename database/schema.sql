@@ -3,8 +3,8 @@
 -- MySQL - Tercera Forma Normal (3FN)
 -- ============================================
 
-CREATE DATABASE IF NOT EXISTS restaurant_pedidos;
-USE restaurant_pedidos;
+CREATE DATABASE IF NOT EXISTS nexora;
+USE nexora;
 
 -- 1. ROLES
 CREATE TABLE roles (
@@ -56,6 +56,7 @@ CREATE TABLE platos (
     precio_base DECIMAL(10,2) NOT NULL,
     categoria_id INT NOT NULL,
     disponible TINYINT(1) DEFAULT 1,
+    destacado TINYINT(1) DEFAULT 0,
     imagen_url VARCHAR(500),
     FOREIGN KEY (categoria_id) REFERENCES categorias(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -95,6 +96,7 @@ CREATE TABLE detalle_pedidos (
     cantidad INT DEFAULT 1,
     precio_unitario DECIMAL(10,2) NOT NULL,
     subtotal DECIMAL(10,2) NOT NULL,
+    nota VARCHAR(255) DEFAULT NULL,
     FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE CASCADE,
     FOREIGN KEY (plato_id) REFERENCES platos(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

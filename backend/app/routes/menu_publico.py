@@ -1,3 +1,4 @@
+from collections import defaultdict
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.models.database import get_db
@@ -6,46 +7,37 @@ from app.models.models import (
     Pedido, DetallePedido, Personalizacion, EstadoPedido, EstadoMesa,
     Solicitud
 )
-from app.schemas.schemas import (
-    PedidoCreateRequest, PedidoResponse,
-    DetallePedidoResponse, PersonalizacionResponse
-)
+from app.schemas.schemas import PedidoCreateRequest, PedidoResponse, SolicitudRequest
+from app.services.serializers import pedido_to_response
 
 router = APIRouter(prefix="/api/public", tags=["public"])
 
 
-def _pedido_to_response(pedido: Pedido) -> PedidoResponse:
-    return PedidoResponse(
-        id=pedido.id,
-        mesa_id=pedido.mesa_id,
-        mesa_numero=pedido.mesa.numero if pedido.mesa else None,
-        estado=pedido.estado.value,
-        total=float(pedido.total),
-        created_at=pedido.created_at,
-        updated_at=pedido.updated_at,
-        detalles=[
-            DetallePedidoResponse(
-                id=d.id,
-                plato_id=d.plato_id,
-                plato_nombre=d.plato.nombre if d.plato else None,
-                cantidad=d.cantidad,
-                precio_unitario=float(d.precio_unitario),
-                subtotal=float(d.subtotal),
-                personalizaciones=[
-                    PersonalizacionResponse(
-                        id=p.id,
-                        ingrediente_id=p.ingrediente_id,
-                        ingrediente_nombre=p.ingrediente.nombre if p.ingrediente else None,
-                        accion=p.accion.value,
-                        cantidad=p.cantidad,
-                        precio_adicional=float(p.precio_adicional)
-                    )
-                    for p in d.personalizaciones
-                ]
+def descontar_stock(db: Session, consumo: dict[int, int]) -> None:
+    """Check there is stock for the whole order, then deduct it.
+
+    Called once per order with the consumption already accumulated. An
+    ingredient that reaches zero is marked unavailable so it stops being
+    offered on the public menu.
+    """
+    for ingrediente_id, unidades in consumo.items():
+        ingrediente = db.query(Ingrediente).filter(Ingrediente.id == ingrediente_id).first()
+        if not ingrediente:
+            raise HTTPException(status_code=404, detail=f"Ingrediente {ingrediente_id} no encontrado")
+        if ingrediente.stock < unidades:
+            raise HTTPException(
+                status_code=409,
+                detail=(
+                    f"No hay stock suficiente de '{ingrediente.nombre}': "
+                    f"quedan {ingrediente.stock} y el pedido necesita {unidades}"
+                )
             )
-            for d in pedido.detalles
-        ]
-    )
+
+    for ingrediente_id, unidades in consumo.items():
+        ingrediente = db.query(Ingrediente).filter(Ingrediente.id == ingrediente_id).first()
+        ingrediente.stock -= unidades
+        if ingrediente.stock == 0:
+            ingrediente.disponible = False
 
 
 @router.get("/menu/{mesa_token}")
@@ -67,6 +59,9 @@ def menu_publico(mesa_token: str, db: Session = Depends(get_db)):
             ingredientes = []
             for pi in p.plato_ingredientes:
                 ing = pi.ingrediente
+                # Never offer as an extra something the admin marked unavailable
+                if pi.es_extra and not ing.disponible:
+                    continue
                 ingredientes.append({
                     "id": ing.id,
                     "nombre": ing.nombre,
@@ -83,6 +78,7 @@ def menu_publico(mesa_token: str, db: Session = Depends(get_db)):
                 "descripcion": p.descripcion,
                 "precio_base": float(p.precio_base),
                 "imagen_url": p.imagen_url,
+                "destacado": bool(p.destacado),
                 "ingredientes": ingredientes
             })
 
@@ -111,6 +107,11 @@ def crear_pedido_publico(data: PedidoCreateRequest, db: Session = Depends(get_db
     db.flush()
 
     total_pedido = 0.0
+    # Units of each ingredient the whole order consumes. Accumulated across all
+    # lines and validated once before the commit: checking line by line would
+    # let two lines of the same dish each pass on their own and drive stock
+    # negative.
+    consumo: dict[int, int] = defaultdict(int)
 
     for detalle_req in data.detalles:
         plato = db.query(Plato).filter(Plato.id == detalle_req.plato_id).first()
@@ -121,28 +122,58 @@ def crear_pedido_publico(data: PedidoCreateRequest, db: Session = Depends(get_db
 
         precio_unitario = float(plato.precio_base)
 
+        nota = (detalle_req.nota or "").strip()[:255] or None
+
         detalle = DetallePedido(
             pedido_id=pedido.id,
             plato_id=plato.id,
             cantidad=detalle_req.cantidad,
             precio_unitario=precio_unitario,
-            subtotal=0
+            subtotal=0,
+            nota=nota
         )
         db.add(detalle)
         db.flush()
 
         extra_cost = 0.0
+        # Only what is flagged as extra can be added, and only what is flagged
+        # as removable can be taken out.
+        composicion = {pi.ingrediente_id: pi for pi in plato.plato_ingredientes}
+        quitados = set()
 
         for pers_req in detalle_req.personalizaciones:
             ingrediente = db.query(Ingrediente).filter(Ingrediente.id == pers_req.ingrediente_id).first()
             if not ingrediente:
                 raise HTTPException(status_code=404, detail=f"Ingrediente {pers_req.ingrediente_id} no encontrado")
 
+            pi = composicion.get(ingrediente.id)
+            if not pi:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"'{ingrediente.nombre}' no forma parte de '{plato.nombre}'"
+                )
+
             precio_adicional = 0.0
             if pers_req.accion == "agregar":
+                if not pi.es_extra:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"'{ingrediente.nombre}' no se puede agregar a '{plato.nombre}'"
+                    )
+                if not ingrediente.disponible:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"El ingrediente '{ingrediente.nombre}' no esta disponible"
+                    )
                 precio_adicional = float(ingrediente.precio_extra) * pers_req.cantidad
-            elif pers_req.accion == "quitar":
-                precio_adicional = 0.0
+                consumo[ingrediente.id] += pers_req.cantidad * detalle_req.cantidad
+            else:
+                if not pi.es_removible:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"'{ingrediente.nombre}' no se puede quitar de '{plato.nombre}'"
+                    )
+                quitados.add(ingrediente.id)
 
             pers = Personalizacion(
                 detalle_pedido_id=detalle.id,
@@ -154,9 +185,17 @@ def crear_pedido_publico(data: PedidoCreateRequest, db: Session = Depends(get_db
             db.add(pers)
             extra_cost += precio_adicional
 
+        # Base ingredients leave the inventory too, except the ones the diner
+        # asked to remove.
+        for pi in plato.plato_ingredientes:
+            if pi.es_default and pi.ingrediente_id not in quitados:
+                consumo[pi.ingrediente_id] += pi.cantidad_default * detalle_req.cantidad
+
         subtotal = (precio_unitario + extra_cost) * detalle_req.cantidad
         detalle.subtotal = subtotal
         total_pedido += subtotal
+
+    descontar_stock(db, consumo)
 
     pedido.total = total_pedido
 
@@ -165,7 +204,7 @@ def crear_pedido_publico(data: PedidoCreateRequest, db: Session = Depends(get_db
 
     db.commit()
     db.refresh(pedido)
-    return _pedido_to_response(pedido)
+    return pedido_to_response(pedido)
 
 
 @router.get("/pedidos/{pedido_id}", response_model=PedidoResponse)
@@ -173,25 +212,21 @@ def seguimiento_pedido(pedido_id: int, db: Session = Depends(get_db)):
     pedido = db.query(Pedido).filter(Pedido.id == pedido_id).first()
     if not pedido:
         raise HTTPException(status_code=404, detail="Pedido no encontrado")
-    return _pedido_to_response(pedido)
+    return pedido_to_response(pedido)
 
 
 @router.post("/solicitar/{mesa_token}")
 def solicitar(
     mesa_token: str,
-    data: dict,
+    data: SolicitudRequest,
     db: Session = Depends(get_db)
 ):
     mesa = db.query(Mesa).filter(Mesa.token_qr == mesa_token).first()
     if not mesa:
         raise HTTPException(status_code=404, detail="Mesa no encontrada")
 
-    tipo = data.get("tipo", "")
-    if tipo not in ("mesero", "cuenta"):
-        raise HTTPException(status_code=400, detail="Tipo invalido")
-
-    solicitud = Solicitud(mesa_id=mesa.id, tipo=tipo)
+    solicitud = Solicitud(mesa_id=mesa.id, tipo=data.tipo)
     db.add(solicitud)
     db.commit()
 
-    return {"message": f"Solicitud de {tipo} registrada", "id": solicitud.id}
+    return {"message": f"Solicitud de {data.tipo} registrada", "id": solicitud.id}

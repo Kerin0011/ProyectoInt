@@ -1,4 +1,4 @@
-const CACHE_NAME = "restaurant-app-v4";
+const CACHE_NAME = "nexora-v1";
 
 const LOCAL_ASSETS = [
   "./",

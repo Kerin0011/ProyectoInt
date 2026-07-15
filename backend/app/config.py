@@ -1,9 +1,10 @@
 import os
+import secrets
 from dotenv import load_dotenv
 
 load_dotenv()
 
-_raw_db_url = os.getenv("DATABASE_URL", "mysql+pymysql://root:@localhost:3306/restaurant_pedidos")
+_raw_db_url = os.getenv("DATABASE_URL", "mysql+pymysql://root:@localhost:3306/nexora")
 
 if _raw_db_url.startswith("mysql://"):
     _raw_db_url = _raw_db_url.replace("mysql://", "mysql+pymysql://", 1)
@@ -12,7 +13,26 @@ elif _raw_db_url.startswith("mysql+mysqlconnector://"):
 
 DATABASE_URL = _raw_db_url
 
-SECRET_KEY = os.getenv("SECRET_KEY", "cambiar-esta-clave-en-produccion")
+_DEV_SECRET_KEY = "clave-solo-para-desarrollo-local"
+
+_is_production = bool(os.getenv("RAILWAY_ENVIRONMENT")) or os.getenv("APP_ENV") == "production"
+
+SECRET_KEY = os.getenv("SECRET_KEY", "").strip()
+if not SECRET_KEY:
+    if _is_production:
+        # The dev key is public in the repo, so anyone could forge an admin
+        # token with it. Fall back to a throwaway key instead: it keeps the
+        # app booting, at the cost of invalidating tokens on every restart.
+        SECRET_KEY = secrets.token_urlsafe(48)
+        print(
+            "[config] ADVERTENCIA: SECRET_KEY no esta definida. Se genero una "
+            "clave temporal: los usuarios tendran que volver a iniciar sesion "
+            "despues de cada reinicio. Configurala como variable de entorno "
+            "(ver README > Variables de entorno)."
+        )
+    else:
+        SECRET_KEY = _DEV_SECRET_KEY
+
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 8
 

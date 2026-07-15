@@ -29,7 +29,7 @@ async function renderPlatosPage(container) {
                 <tbody>
                     ${platos.map(p => `
                         <tr>
-                            <td>${p.nombre}</td>
+                            <td>${p.nombre}${p.destacado ? ` <span class="badge-destacado" title="Recomendado">${Icons.icon('star', 13)}</span>` : ""}</td>
                             <td>${p.categoria_nombre || "N/A"}</td>
                             <td>${formatPrice(p.precio_base)}</td>
                             <td>
@@ -108,7 +108,7 @@ async function renderPlatosPage(container) {
                             <div class="mb-3">
                                 <label class="form-label">Categoria</label>
                                 <select class="form-select" id="fp-categoria">
-                                    <option value="1">Entradas</option>
+                                    <option value="1" ${(!plato || plato.categoria_id === 1) ? "selected" : ""}>Entradas</option>
                                     <option value="2" ${plato?.categoria_id === 2 ? "selected" : ""}>Platos Fuertes</option>
                                     <option value="3" ${plato?.categoria_id === 3 ? "selected" : ""}>Bebidas</option>
                                     <option value="4" ${plato?.categoria_id === 4 ? "selected" : ""}>Postres</option>
@@ -117,6 +117,10 @@ async function renderPlatosPage(container) {
                         <div class="mb-3">
                             <label class="form-label">URL de la Imagen</label>
                             <input class="form-control" type="url" id="fp-imagen" value="${plato?.imagen_url || ""}" placeholder="https://ejemplo.com/foto.jpg">
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="fp-destacado" ${plato?.destacado ? "checked" : ""}>
+                            <label class="form-check-label" for="fp-destacado">Recomendado (aparece en "Destacados" del menú)</label>
                         </div>
                             <div class="mb-3">
                                 <label class="form-label">Ingredientes</label>
@@ -182,6 +186,7 @@ async function renderPlatosPage(container) {
             const precio_base = parseFloat(document.getElementById("fp-precio").value);
             const categoria_id = parseInt(document.getElementById("fp-categoria").value);
             const imagen_url = document.getElementById("fp-imagen").value || null;
+            const destacado = document.getElementById("fp-destacado").checked;
 
             const selectedIngs = [];
             document.querySelectorAll(".ing-check:checked").forEach(cb => {
@@ -205,7 +210,8 @@ async function renderPlatosPage(container) {
                 precio_base,
                 categoria_id,
                 imagen_url,
-                disponible: true,
+                destacado,
+                disponible: plato?.disponible ?? true,
                 ingredientes: selectedIngs
             };
 

@@ -1,9 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import CORS_ORIGINS
+from app.models.database import run_migrations
 from app.routes import auth, mesas, platos, ingredientes, pedidos, menu_publico, dashboard, solicitudes
 
-app = FastAPI(title="Restaurant Order API", version="1.0.0")
+app = FastAPI(title="Nexora API", version="1.0.0")
+
+
+@app.on_event("startup")
+def _startup():
+    run_migrations()
 
 app.add_middleware(
     CORSMiddleware,
@@ -25,4 +31,4 @@ app.include_router(solicitudes.router)
 
 @app.get("/")
 def root():
-    return {"message": "Restaurant Order API v1.0.0"}
+    return {"message": "Nexora API v1.0.0"}

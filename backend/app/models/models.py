@@ -101,6 +101,7 @@ class Plato(Base):
     precio_base = Column(DECIMAL(10, 2), nullable=False)
     categoria_id = Column(Integer, ForeignKey("categorias.id"), nullable=False)
     disponible = Column(Boolean, default=True)
+    destacado = Column(Boolean, default=False)
     imagen_url = Column(String(500))
 
     categoria = relationship("Categoria", back_populates="platos")
@@ -148,6 +149,7 @@ class DetallePedido(Base):
     cantidad = Column(Integer, default=1)
     precio_unitario = Column(DECIMAL(10, 2), nullable=False)
     subtotal = Column(DECIMAL(10, 2), nullable=False)
+    nota = Column(String(255), nullable=True)
 
     pedido = relationship("Pedido", back_populates="detalles")
     plato = relationship("Plato", back_populates="detalle_pedidos")

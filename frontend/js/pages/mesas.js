@@ -29,6 +29,10 @@ async function renderMesasPage(container) {
                                 data-id="${m.id}" data-estado="${m.estado}" id="mesa-toggle-${m.id}">
                                 ${m.estado === 'libre' ? 'Ocupar' : 'Liberar'}
                             </button>
+                            <button class="btn btn-sm btn-outline-primary regenerar-qr-btn mb-1"
+                                data-id="${m.id}" id="mesa-qr-${m.id}">
+                                Regenerar QR
+                            </button>
                             <button class="btn btn-sm btn-outline-danger eliminar-mesa-btn"
                                 data-id="${m.id}" id="mesa-del-${m.id}">
                                 Eliminar

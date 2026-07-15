@@ -57,6 +57,7 @@ async function renderSeguimientoPage(container) {
                                 <br><small style="color:#8c7569;font-size:12px">
                                     ${d.personalizaciones.map(p => p.accion + ": " + p.ingrediente_nombre).join(", ")}
                                 </small>` : ""}
+                                ${d.nota ? `<br><small style="color:#c25d1f;font-size:12px">${Icons.icon('note', 11)} ${d.nota}</small>` : ""}
                             </div>
                             <strong>${formatPrice(d.subtotal)}</strong>
                         </div>`).join("")}
@@ -83,7 +84,13 @@ async function renderSeguimientoPage(container) {
             </div>`;
 
             if (pedido.estado !== "cancelado" && pedido.estado !== "entregado") {
-                setTimeout(() => renderSeguimientoPage(container), 5000);
+                // Stored on _currentInterval so the router can clear it on
+                // navigation; otherwise the polling would overwrite the next page.
+                window._currentInterval = setTimeout(() => {
+                    if (window.location.hash.startsWith("#/seguimiento/")) {
+                        renderSeguimientoPage(container);
+                    }
+                }, 5000);
             }
         } catch (err) {
             container.innerHTML = `<div class="tracking-app"><div class="empty-state" style="padding-top:80px">${err.message}</div></div>`;

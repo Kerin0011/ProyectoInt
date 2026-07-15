@@ -1,9 +1,13 @@
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.models.database import get_db
-from app.models.models import Usuario
+from app.models.models import Usuario, Rol
 from app.schemas.schemas import LoginRequest, TokenResponse, UsuarioCreate, UsuarioResponse
-from app.services.auth import hash_password, verify_password, create_access_token, get_current_user
+from app.services.auth import (
+    hash_password, verify_password, create_access_token,
+    get_current_user, get_current_user_opcional
+)
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -31,12 +35,39 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/register", response_model=UsuarioResponse)
-def register(data: UsuarioCreate, db: Session = Depends(get_db)):
+def register(
+    data: UsuarioCreate,
+    db: Session = Depends(get_db),
+    current_user: Optional[Usuario] = Depends(get_current_user_opcional)
+):
+    # The very first user is created without a token to bootstrap the initial
+    # admin. After that, only an admin can create users.
+    es_primer_usuario = db.query(Usuario).count() == 0
+    if not es_primer_usuario:
+        if current_user is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Credenciales invalidas",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        if current_user.rol.nombre != "admin":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Solo un administrador puede registrar usuarios"
+            )
+
     existing = db.query(Usuario).filter(Usuario.email == data.email).first()
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="El email ya esta registrado"
+        )
+
+    rol = db.query(Rol).filter(Rol.id == data.rol_id).first()
+    if not rol:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"El rol {data.rol_id} no existe"
         )
 
     user = Usuario(
