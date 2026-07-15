@@ -1,3 +1,8 @@
+// Name of the restaurant using Nexora. This is the one value that changes per
+// client, and it is what the diner sees on the public menu. "Nexora" is the
+// product name and belongs in the staff panel, never on the diner's screen.
+const RESTAURANT_NAME = "Mi Restaurante";
+
 const API_BASE = (function () {
     const params = new URLSearchParams(window.location.search);
     if (params.get("api")) return params.get("api");

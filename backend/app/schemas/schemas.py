@@ -159,10 +159,15 @@ class PedidoResponse(BaseModel):
 
 
 class EstadoUpdate(BaseModel):
+    """Order state. Tables use EstadoMesaUpdate, they are different domains."""
     estado: Literal[
         "pendiente", "confirmado", "en_preparacion",
         "listo", "entregado", "cancelado"
     ]
+
+
+class EstadoMesaUpdate(BaseModel):
+    estado: Literal["libre", "ocupada"]
 
 
 class DisponibilidadUpdate(BaseModel):

@@ -200,6 +200,18 @@ ni tocan datos reales.
 
 ---
 
+## 🏪 Configuración por cliente
+
+**Nexora** es el nombre del producto y solo aparece en el panel del personal. El
+comensal ve el nombre del **restaurante**, que se ajusta en un único sitio,
+`frontend/js/config.js`:
+
+```js
+const RESTAURANT_NAME = "Mi Restaurante";
+```
+
+Ese valor titula el menú público y la pestaña del navegador del comensal.
+
 ## 🔧 Variables de entorno
 
 `backend/.env` (ver `backend/.env.example`):

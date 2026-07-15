@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.models.database import get_db
 from app.models.models import Mesa, Usuario, Pedido, DetallePedido, Solicitud
-from app.schemas.schemas import MesaCreate, MesaResponse, EstadoUpdate
+from app.schemas.schemas import MesaCreate, MesaResponse, EstadoMesaUpdate
 from app.services.auth import get_current_user, require_role
 
 router = APIRouter(prefix="/api/mesas", tags=["mesas"])
@@ -55,16 +55,13 @@ def crear_mesa(
 @router.patch("/{mesa_id}/estado", response_model=MesaResponse)
 def cambiar_estado_mesa(
     mesa_id: int,
-    data: EstadoUpdate,
+    data: EstadoMesaUpdate,
     db: Session = Depends(get_db),
     current_user: Usuario = Depends(get_current_user)
 ):
     mesa = db.query(Mesa).filter(Mesa.id == mesa_id).first()
     if not mesa:
         raise HTTPException(status_code=404, detail="Mesa no encontrada")
-
-    if data.estado not in ["libre", "ocupada"]:
-        raise HTTPException(status_code=400, detail="Estado invalido")
 
     mesa.estado = data.estado
     db.commit()

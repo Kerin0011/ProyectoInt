@@ -82,11 +82,14 @@ function renderShell() {
     const container = document.getElementById("app-content");
     const cartCount = cart.reduce((sum, item) => sum + item.cantidad, 0);
 
+    // The diner is a guest of the restaurant, not a user of Nexora
+    document.title = RESTAURANT_NAME;
+
     container.innerHTML = `
     <div class="menu-app">
         <div class="header-bar">
             <div class="restaurant-info">
-                <h1>Nexora</h1>
+                <h1>${RESTAURANT_NAME}</h1>
                 <div class="table-badge">
                     ${Icons.icon('globe', 14)} Mesa ${menuData.mesa}
                 </div>
